@@ -1,0 +1,45 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\begin{document}
+\usetikzlibrary{mindmap, trees}
+\begin{tikzpicture}
+    [mindmap, 
+    every node/.style={concept, execute at begin node=\hskip0pt},
+    concept color=black!20,
+    root concept/.append style={
+        concept color=black, fill=white, line width=1ex, text=black, font=\large\scshape},
+    grow cyclic,
+    text=white,
+    level 1/.append style={level distance=4.5cm,sibling angle=90},
+    level 2/.append style={level distance=3cm,sibling angle=45}]
+    \node [root concept]{Network Security}
+    child [concept color=red]{ node {Anonymous Credentials}
+        child { node {Problem Measures} }
+        child { node {Problem Aspects} }
+        child { node {Problem Domains} }
+        child { node {Key Problems} }
+        }
+    child [concept color=blue]{ node {Blockchain Security}
+        child { node {Turing Machines} }
+        child { node {Random-Access Machines} }
+        child { node {Circuits} }
+        child { node {Binary Decision Diagrams} }
+        child { node {Oracle Machines} }
+        child { node {Programming in Logic} }
+        }
+    child [concept color=orange]{ node {Cloud Security}
+        child { node {Complexity Measures} }
+        child { node {Classifying Complexity} }
+        child { node {Comparing Complexity} }
+        child { node {Describing Complexity} }
+        }
+    child [concept color=green!40!black]{ node {Formal Proof}
+        child { node {Tamarin Prover} }
+        child { node {Difficulty Reduction} }
+        child { node {Fixed-Parameter Algorithms} }
+        child { node {Parallel Computation} }
+        child { node {Partial Solutions} }
+        child { node {Approximation} }
+    };
+\end{tikzpicture}
+\end{document}
