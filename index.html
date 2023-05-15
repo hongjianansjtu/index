@@ -8,6 +8,30 @@
   </head>
   <body>
     <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <h1>Technical Challenges in Study</h1>
+    <ol>
+      <li>To build a blockchain-based ID system, but with isoloated verifiers
+        <ul>
+          <li>The verifier is not able to query blockchain nodes</li>
+          <li>Revocation should be taken into account</li>
+        </ul>
+      </li>
+      <li>To build a multi-factor authentication 
+        <ul>
+          <li>BBS+ is chosen as the key factor technology</li>
+          <li>The non-key factor should no reveal more information than BBS+.</li>
+        </ul></li>
+        <li>A multi-authority revocation without strict trust assumption<ul>
+          <li>A credential is issued by multiple authorities.</li>
+          <li>It satisfies RP's predicate.</li>
+          <li>But some attributes are issued by RP's untrusted authority</li>
+        </ul></li></li>
+    </ol>
+    
+    <div id="box" style="width:300px; height: 300px">
+
+    </div>
+    
     <div id="main" style="width: 600px;height:400px;"></div>
     <script type="text/javascript">
       // 基于准备好的dom，初始化echarts实例
@@ -16,7 +40,7 @@
       // 指定图表的配置项和数据
       var option = {
   title: {
-    text: 'Publish Statistics'
+    text: 'Statistics'
   },
   tooltip: {
     trigger: 'axis',
@@ -43,12 +67,22 @@
     {
       name: 'ALL',
       type: 'bar',
-      data: [2, 5, 7, 6, 10]
+      data: [2, 5, 7, 7, 10]
     },
     {
       name: 'CP-ABE',
       type: 'bar',
-      data: [0, 4, 0, 0, 1]
+      data: [0, 4, 5, 2, 1]
+    },
+    {
+      name: 'Phy Sec',
+      type: 'bar',
+      data: [0, 0, 0, 1, 2]
+    },
+    {
+      name: 'Authentication',
+      type: 'bar',
+      data: [0, 0, 0, 1, 2]
     }
   ]
 };
