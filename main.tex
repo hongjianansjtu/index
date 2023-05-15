@@ -1,0 +1,184 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb}
+\usepackage{algorithm,algorithmic}
+\title{Fine-Grained Anonymous Authentication for Multi-Authority System with Privilege Revocation}
+\author{Jianan Hong, Jia Cao and Cunqing Hua
+\thanks{J. Hong, C. Hua are with the School of Cipher Science and Engineering, Shanghai Jiao Tong University, Shanghai, China.
+
+J. Cao is with the SJTU Paris Elite Institute of Technology, Shanghai Jiao Tong University, Shanghai, China.
+}
+}
+\begin{document}
+	\maketitle
+	
+	\begin{abstract}
+		Due to the character of selective attribute hiding authentication, the technique of anonymous credentials attracts lots of researchers from various areas, one of which is future network security. Despite its attractive features, lots of challenging issues still remains, such as dynamic privilege or attribute update, requirement of multiple authority supporting. 
+		In this paper, we propose a new fine-grained and privacy-preserving authentication scheme. In this scheme, a user's credential is issued with multiple authorities. Different from existing multi-authority system, our scheme is secure even when some authorities are not trusted by all entities. A user whose privilege is revoked can no longer authenticate withe the leverage of bilinear-based cryptographic accumulator. To realize the revocation, other users and the authorities only need lightweight computation cost with public parameters. With the tackle of these practical challenges, the proposed scheme suits various single sign-on (SSO) systems in the future network world. Rigorous security proof and experiment results show the feasibility and security of our scheme.
+	\end{abstract}
+\begin{IEEEkeywords}
+	Anonymous Credentials, multi-authority, fine-grained access control, privilege revocation.
+\end{IEEEkeywords}
+
+
+\section{Introduction}
+Thanks to the breakthrough of network technology in 5G (e.g., extremely low latency, large throughput and the amount of devices) \cite{5gwhitepaper}, various of services are provided, such as VR/AR, navigation, shared software/hardware for industrial, vehicles, and citizens. Most of the above services are commercially provided with predefined access polices, thus raise new challenges for secure and privacy-preserving authentication. The traditional user authentication methods, like 5G-AKA and PKI, no longer satisfy the upcoming network environment, as the service providers and identity authorities are becoming decentralized, the services are becoming diverse, and the privacy is becoming more and more concerned. 
+
+Traditional authentication methods in wireless network require the identity provider (IdP) participates in the authentication phase, directly. For example, in 4G/5G environment \cite{33401, 33501, 33102}, the HSS/UDM should be online to generate the authentication vector for every attach requests; in the OAuth-based single sign-on system \cite{oauth, recordon2006openid}, the IdP should be always online to grant access tokens for relevant relying parties. Such restriction has brought two security risk: on the one hand, the IdP becomes the single point bottleneck problems on both security and efficiency; on the other hand, the IdP masters the entire access logs of every users, which is a serious privacy threat. 
+
+Quite a lot of security schemes have been proposed to enhance the anonymity and privacy properties in authentication scenarios, especially for the single sign-on (SSO) systems. Among them, the primitive of anonymous credentials appeals lots of attentions from academia and industrial(e.g., U-Prove \cite{uprove} and IdeMix \cite{idemix}) areas due to its selective attribute disclosure during authentication. Since J. Camenisch and E. Herreweghen firstly apply the first cryptographic signature algorithm \cite{camenisch2002design} for anonymous credentials in 2002, many further algorithms \cite{camenisch2004signature, pointcheval2016short} and protocols \cite{elpasso, blockchain} haven been proposed.
+\section{Preliminaries}
+\subsection{Bilinear Pairing}
+Let $\mathbb{G}_1$, $\mathbb{G}_2$ and $\mathbb{G}_T$ be 3 groups of prime order $p$. A pairing map $e:\mathbb{G}_1\times \mathbb{G}_2\rightarrow\mathbb{G}_T$ satisfies:
+\begin{itemize}
+	\item \textit{Bilinearity:} for all $(x,y, g_1, g_2) \in \mathbb{Z}_p^2\times \mathbb{G}_1\times \mathbb{G}_2$, $e(g_1^x, g_2^y) = e(g_1, g_2)^{xy}$;
+	\item \textit{Non-degeneracy:} if $g_1, g_2$ are generators of $\mathbb{G}_1$ and $\mathbb{G}_2$, respectively, $e(g_1, g_2)$ generates $\mathbb{G}_T$;
+	\item \textit{Efficiency:} It is efficient to compute $e(u,v)$ for all $(u, v) \in \mathbb{G}_1\times \mathbb{G}_2$.
+\end{itemize}
+
+According to the relationship of $\mathbb{G}_1$ and $\mathbb{G}_2$, there are three types of pairings. 
+In Type 1, $\mathbb{G}_1 = \mathbb{G}_2$; In Type 2, $\mathbb{G}_1 \neq \mathbb{G}_2$, but there is a unidirectional homomorphism $\phi:\mathbb{G}_2 \rightarrow \mathbb{G}_1$; An in Type 3, no PPT homomorphism algorithm exists between the two groups.
+
+Overall speaking, Type 3 pairings are more secure and efficient to map. Thus, Type 3 is used in this paper.
+
+\subsection{Zero Knowledge Proof for Discrete Logarithm}
+
+\begin{algorithm}[h]
+	\caption{$\Sigma$ Protocol for $\{x: g^x = y\}$}\label{alg:dlproof}
+	\begin{algorithmic}[1]
+		\STATE $r\in_R\mathbb{Z}_p$, $R = g^r$ 
+		\STATE $c\in \mathbb{Z}_p $ according to a secure hash with input $R$
+		\STATE $z = cx + r$
+		\RETURN $(R, c, z)$
+	\end{algorithmic}
+\end{algorithm}
+
+	\begin{table}[h]
+		\caption{Notations}
+		\label{table:notate}
+		\centering
+		\begin{tabular}{c|l}
+			\hline
+			\emph{Notation} & \emph{Description}\\
+			\hline
+			$\Delta$ & (Current) public parameter of accumulator\\
+			$(k_i, W_i)$ & Member and its witness for accumulator\\
+			$\sigma$ & The anonymous credential\\
+			$A_i$ & The $i$-th authority\\
+			$\mathbb{S}_i$ & Index set of attributes managed by $A_i$\\
+		\end{tabular}
+	\end{table}
+	%$A_i$ for all $i$ has secret key $x_i$, which are the shares of $x$, so that $g_1^x = X$. A central authority manages users joining and revocation, gets $\gamma$ and $\Delta, Y = g_2^\gamma$
+	
+	%A user with attribute set $m_1, ..., m_n$ requests an anonymous credential. He selects a set of $A_i$, each of whom is responsible for a subset of his attributes. Let $\mathbb{S}$ denote the authority set. Let $\lambda_i$ be the coefficient for $A_i$'s task of secret reconstruction in the set $\mathbb{S}$.
+	
+	\subsection{System Setup}
+	This procedure consists of CA initialization and AA joining. 
+	\subsubsection{CA Initialization}
+	The CA initializes the parameters of credential and accumulator systems as follows. It generates a bilinear group $PP=\{p, \mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T, g_1, g_2, e\}$ and a secure hash function $H:\{0,1\}^*\rightarrow \mathbb{Z}_p$. It selects two secrets $\gamma, y_0\in \mathbb{Z}_p$, a number of secret member values $k_1, \dots, k_N$, where $N$ is the maximal times to issue credentials.
+	
+	It publishes $\Delta = g_1^{\prod_{i=1}^{N}(\gamma+k_i)}, X= g_2^\gamma, Y_0= g_2^{y_0}$.
+	\subsubsection{AA Joining}
+	A valid AA plays the role of attribute-based credential issuing, without the need of CA permission. Whereas, the trust of relevant RPs is required, that it can be responsible to certify a certain set of attributes.
+	
+	Let $\mathbb{S}_i$ be the index set of attributes managed by the $i$th AA (denoted as $A_i$). For each $k\in \mathbb{S}_i$, $A_i$ selects a random $y_k$ as the secret key of the attribute index, and publishes the public parameter $Y_k = g_2^{y_k}$, with the knowledge proof of logarithm $y_k$ with $\Sigma$ protocol as Algorithm \ref{alg:dlproof}. 
+	Other entities, who trust $A_i$ append $\{Y_k\}_{k\in \mathbb{S}_i}$ to their stored public parameters.
+	
+	For every two different $A_i$ and $A_j$, their managed attributes are different, holding $\mathbb{S}_i \bigcap \mathbb{S}_j = \emptyset$. In the remaining of this paper, let $n$ be the total number of attribute indexes from all AAs.
+	\subsection{User Join}
+	CA selects $k_j$ as user's member value in accumulator $\Delta$ and a random $v_j \in \mathbb{G}_1$. With $k_i, v_j$, CA calculates $W_i = \Delta^{\frac{1}{k_j + \gamma}}$, and $\sigma_j = (v_j, v_j^{\gamma+ k_j\cdot y_0})$. It sends $(k_j, W_j, \sigma_j)$ to the user. 
+	
+	\subsection{Credential Generation}
+	%The user computes $C = g_1^t Y_0^{k_j}\prod_{i=1}^{n}Y_i^{m_i}$. For each $A_i\in \mathbb{S}$, it should be responsible for a subset of attributes. Use $I_i\subsetneq [1, n]$ be the index of the attributes verified by $A_i$. 
+	
+	%For each $A_i$, the user sends $\{m_i|i\in I_i\}$, $C_i$, and runs a proof protocol with $A_i$ for for the knowledge that he knows other hidden attributes and $k_i$, which is in accumulated in $\Delta$.
+	The user with $(k_j, W_j, \sigma_j)$ sequentially goes to each $A_i$ to sign a set of attributes into his credential. Parse $\sigma_j = (\sigma_1, \sigma_2)$, and $I\subsetneq [1, n]$ be the index set of attributes has been signed in $\sigma_j$. The user plays a validity protocol with $A_i$ with the following steps.
+	\begin{enumerate}
+		\item The user randomly chooses $r, t, u$ and generates 
+		\begin{align}\label{eq:blindcred}
+		A &= W_i^r, B = A^{-k}\cdot \Delta^r, D =\Delta^r,\\ 
+		\sigma' &= (\sigma_1^t,(\sigma_2\cdot \sigma_1^u)^t).\nonumber
+		\end{align} 
+		Then he chooses $r_r, r_k, r_u$ and $\{r_s\}, s\in I$, 
+		and sends 
+		\begin{align}
+		R_0 =& e(\sigma_1^t, Y_0^{r_k}g_2^{r_u}\prod_{s \in I} Y_s^{r_s}) \\
+		R_1 =& \Delta^{r_r},\\
+		R_2 =& A ^{-r_k},
+		\end{align}
+		together with $A, B, D$ and $\sigma'$.
+		\item $A_i$ checks if $I\bigcap \mathbb{S}_i \overset{?}{=} \emptyset$, and selects a random coin $c\in \mathbb{Z}_p$ to the user.
+		\item The user sends $z_r = r_r + cr$, $z_k = r_k + ck_j$, $z_u = r_u + cu$, and for all $s\in I: z_s = r_s + c m_s$. 
+		\item Parse $\sigma' = (\sigma_1', \sigma_2')$, $A_i$ checks 
+		\begin{align}
+		(\frac{e(\sigma_2', g_2)}{e(\sigma_1', X)})^c R_0 & = e(\sigma_1', g_2^{z_u}Y_0^{z_k}\prod_{s \in I}Y_s^{z_s})\\
+		D^c R_1 & = \Delta^{z_r} \\
+		(B/D)^c R_2 & = A^{-z_k} \\
+		e(A, Y) &= e(B, g_2) 
+		\end{align}
+	\end{enumerate}
+
+After the protocol, $A_i$ selects a random $t_i\in\mathbb{Z}_p$ and prepares the user's attribute set $m_k, \forall k\in \mathbb{S}_i$. It outputs the credential as 
+$$\sigma = (\sigma_1'^{t_i}, (\sigma_2'\cdot \sigma_1'^{\sum_{k\in\mathbb{S}_i }y_k \cdot m_k})^{t_i})$$
+
+The above algorithm will be executed sequentially In the end of this procedure, the user will get a signature on $n$ attributes $(m_1,\dots, m_n)$, as $(k_j, W_j, \sigma=(\sigma_1, \sigma_2))$
+
+\subsection{Revocation}
+The revocation phase can be called by the user him/herself or the authority, who finds that the user no longer has the attributes issued by the authority. The request verification is important, but is beyond the scope of this paper. 
+
+Assume that CA accepts the request. Let the current accumulator be $\Delta$. It queries the user's parameter $k_j$, and publishes $k_j$, along with the new accumulator as $$\Delta_{new} = \Delta^{\frac{1}{k_j + \gamma}}.$$ All the entities use $\Delta_{new}$ to replace original accumulator. 
+
+Other users' should update their witness. For a user $i\neq j$, the update algorithm is 
+$$W_i^{new} = (\frac{W_i}{\Delta_{new}})^{\frac{1}{k_j-k_i}}$$
+
+Note that, for the description clarity of other procedures, let $\Delta$ and $W_i$ always denote the current validate accumulator and user's witness, respectively. 
+	
+	
+\subsection{Anonymous Authentication}
+Faced with a service provided by an RP, which requires an access control policy containing attribute index set $I_R\subset [1, n]$. For some index $i$ in $I_R$, the policy requires a determined attribute value, and for others, it may be a predicate for allowed values (e.g., a certain range or candidates).  Let indexes of former case constitute set $I_f$ and the latter constitute $I_r$. 
+
+In the latter case, it requires a certain knowledge proof to claim that a same $m_i$ is a valid attribute in the credential and belongs to the predicate. This paper cannot traverse all kinds of cases, hence just treat it as a bool algorithm 
+$$\mathcal{V}(P, c\odot R=f_R(\{r_i\}), \{z_i\}),$$
+where $P$ is the predicate policy, $R$ is the commitment generated in a certain function $f_R$ with blinded secret $\{r_i\}$, $c$ and $\{z_i\}$ are the challenge and response, respectively.
+
+Especially, in our scheme, the RP can notify the set of its trusted Authority, which determines its trusted attribute index $I_T$. It is easy to understand that $I_R\subset I_T \subset [1, n]$. 
+
+If the user denies to show his/her attribute information according to the policy, or his/her attribute set cannot satisfy the policy, the protocol is aborted. 
+Otherwise, he/she selects $r, t, u$ and computes $A, B, D, \sigma'$ as Eq. (\ref{eq:blindcred}). Then, he/she chooses $r_r, r_k, r_u$ and $\{r_s\}, s\in \lnot I_f$ and computes 
+\begin{align}
+R_0 =& e(\sigma_1^t, Y_0^{r_k}g_2^{r_u}\prod_{s \in \lnot I_f} Y_s^{r_s}) \\
+R_1 =& \Delta^{r_r},\\
+R_2 =& A ^{-r_k},\\
+R_f =& f(r_s\in I_r)\\
+c = & H(A, B, D, \sigma', R_0, R_1, R_2, R_f) \label{eq:hashforcoin}
+\end{align}
+
+Computes and sends $z_r = r_r + cr$, $z_k = r_k + ck_j$, $z_u = r_u + cu$, and for all $s\in \lnot I_f: z_s = r_s + c m_s$ with $(A, B, D, \sigma', R_0, R_1, R_2, R_f)$ as the service request message. For attributes whose index $s\notin I_T$, the corresponding discrete logarithm proof of $Y_i$ should be known to the RP by any means.
+
+After RP receives the message. It first checks the freshness of accumulator $\Delta$. Then, computes $c$ as Eq. (\ref{eq:hashforcoin}) and checks the following equations.
+\begin{align}
+(\frac{e(\sigma_2', g_2)}{e(\sigma_1', X\prod_{s \in I_f}Y_s^{m_f} )})^c R_0 & = e(\sigma_1', g_2^{z_u}Y_0^{z_k}\prod_{s \in \lnot I_f}Y_s^{z_s})\nonumber \\
+D^c R_1 & = \Delta^{z_r} \\
+(B/D)^c R_2 & = A^{-z_k} \\
+e(A, Y) &= e(B, g_2) \\
+\mathcal{V}(P, c\odot R_f, \{z_s\}_{s\in\lnot I_f}) &= True
+\end{align}
+If all the equations hold, this authentication is verified by RP.
+\subsection{Correctness}
+Let $u = \sum_{i\in\mathbb{S}}u_i $. We have 
+\begin{align}
+\prod_{i\in \mathbb{S}}\sigma_i(2) = &\prod_{i\in \mathbb{S}}(g_1^u)^{\lambda_i x_i}C^{u_i} \\
+=& (g_1^u)^{\sum_{i\in\mathbb{S}}\lambda_i x_i} C^{\sum_{i\in\mathbb{S}}u_i}\\
+=& g_1^{ux}C^u = (g_1^xC)^u
+\end{align}
+After divided by $\sigma(1)^t$, we have
+$$\sigma(2) = (g_1^xC)^u/g_1^{ut} = (g_1^x Y_0^{k_j}\prod_{i=1}^nY_i^{m_i})^u$$
+which is the valid format of PS signature on attribute set and $k_i$ with secret key $x$.
+
+\section{Security Analysis}
+Only authorized credential is able to convince an RP, even if the credential contains attributes issued by the RP's untrusted authority. 
+
+We should defend the attack that, a user's credential is not authorized by a predict $P$ due to an unsatisfied attribute $m_k$ (We will extent to cases where more than one attributes are unsatisfied). Malicious Access will try to fix $m_k$ to a satisfied value (denoted as $\mathbf{m}_k$). To realize the above fix, the diff value should be set on other attribute indexes.
+
+\bibliographystyle{IEEEtran}
+\bibliography{mybib}
+\end{document}
