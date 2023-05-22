@@ -10,7 +10,7 @@
         concept color=black, fill=white, line width=1ex, text=black, font=\large\scshape},
     grow cyclic,
     text=white,
-    level 1/.append style={level distance=4.5cm,sibling angle=90},
+    level 1/.append style={level distance=4.3cm,sibling angle=90},
     level 2/.append style={level distance=3cm,sibling angle=45}]
     \node [root concept]{Network Security}
     child [concept color=red]{ node {Anonymous Credentials}
@@ -21,17 +21,17 @@
         }
     child [concept color=blue]{ node {Blockchain Security}
         child { node {DPKI in IoT} }
+        child { node {Privacy in SSI} }
         child { node {Secure Consensus} }
         child { node {Leader Election} }
         child { node {Routing} }
-        child { node {Oracle Machines} }
-        child { node {Programming in Logic} }
+        child { node {Trust Estimate} }
         }
     child [concept color=orange]{ node {Cloud Security}
         child { node {Access Control} }
-        child { node {Classifying Complexity} }
-        child { node {Comparing Complexity} }
-        child { node {Describing Complexity} }
+        child { node {Trust Outsourcing} }
+        child { node {Timed Release} }
+        child { node {Multiple Authority} }
         }
     child [concept color=green!40!black]{ node {Formal Proof}
         child { node {Tamarin Prover} }
