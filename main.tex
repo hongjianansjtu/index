@@ -1,5 +1,6 @@
 \documentclass[journal]{IEEEtran}
 \usepackage{amsmath,amssymb}
+\usepackage[numbers, sort&compress]{natbib}
 \usepackage{algorithm,algorithmic}
 \title{Fine-Grained Anonymous Authentication for Multi-Authority System with Privilege Revocation}
 \author{Jianan Hong, Jia Cao and Cunqing Hua
@@ -29,7 +30,7 @@ Quite a lot of security schemes have been proposed to enhance the anonymity and 
 
 Besides the single bottleneck problems, another drawback of SSO is that the centralized architecture does not suit the real-world scenarios, which is not tackled by anonymous credentials. A practical method is that a user's various attributes are managed by different authorities, as shown in Table \ref{table:usecase}. Although some schemes have realized credential issued by multiple issuers, the RP should trust all issuers of a credential to be verified. However, a more practical scenario is that the RP only trusts the authorities who are responsible for its concerned attribute dimension. For instance, a video play service is published with an access policy that determines attributes issued by Netflix (movie balance, hobbies), birth records authority (age), etc., the relevant service provider only trusts the necessary issuers, but does not trust authorities like Transport Department. Whereas, current multi-authority anonymous credentials schemes will become insecure if the credential's issuers contain non-trusted authorities. 
 
-Also, privilege revocation is another important feature.
+Also, privilege revocation is another important feature. The cryptographic accumulator \cite{accumulator} is an ideal method to realize revocation for many privacy-preserving authentication schemes, including anonymous credentials. 
 
 \begin{table}[t]
 	\caption{A Use Case of Multi-authority scenario}\label{table:usecase}
