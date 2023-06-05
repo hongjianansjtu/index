@@ -39,7 +39,10 @@ Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom fi
     \Pr(1) \simeq (1 - e^{-k\delta/m})^k 
  \end{align}
 
-The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \frac{m}{n}\ln 2$. Then, for $n$ valid users.
+The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \frac{m}{\delta}\ln 2$. Then, for $n$ valid users, the expected ... (limited to $\theta$) is 
+\begin{align}
+    \theta = n \cdot (1 - e^{-k\delta/m})^{k} = 0.5^{\frac{m}{\delta}\ln 2}
+\end{align}
 
 \section{Security }
 \end{document}
