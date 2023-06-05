@@ -1,4 +1,5 @@
 \documentclass{IEEEconf}
+\usepackage{amsmath, amssymb}
 \title{A Revokable Blockchain-based Identity Management Scheme for Extremely Low-Latency Authentication Scenarios}
 \author{Jianan Hong, Jia Cheng, Chuan Zhang, Tong Wu, Yue Wu}
 \begin{document}
@@ -6,4 +7,39 @@
 
 \section{Introduction}
 Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust estabilishment. Compared with traditional identity system, such as PKI (public key infrastructure), the characture of blockchain-based method suits better in current and future network systems, where
+
+\section{Construction}
+\subsection{Revocation-Aware Block Format}
+The block structure in this paper is desgined to make lightweight node aware of critical ledger status, e.g., user revocation. 
+
+Block header \dots
+
+[Two flag bits, consensus field is modeled as a PoW method]
+
+Transactions \dots
+
+[transactions are structured as normal MHT if no revocation happens. When any flag is ..., the difference is introduced]
+
+
+\subsection{System Procedures}
+
+
+\subsection{Parameter Determine for Bloom Filter}
+
+The length of Bloom Filter in this paper can be dramatically decreased compared with other schemes for certificate revocation. This section gives a theoretical derivation for the relevant parameter.
+
+Let $n, \delta$ be the possible maximal number of registered and revoked users, respectively. The remaining factor is system effect of user revocation: when revocation is executed in one consensus round, the expected affected users should be limited to $\theta$, which can be  measured as the member amount of Accumulator $\Delta$. The measurement is feasible as:
+\begin{itemize}
+    \item If the revoked user was once a member of accumulator, its revocation 
+    \item Otherwise, the revoked user was ..., it may result in new legal user to apply for accumulator. 
+\end{itemize}
+
+Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom filter. With $\delta$ users already be revoked, the probability can be measured as follows, that an unrevoked user is erroneously claimed as revoked  
+\begin{align} 
+    \Pr(1) \simeq (1 - e^{-k\delta/m})^k 
+ \end{align}
+
+The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \frac{m}{n}\ln 2$. Then, for $n$ valid users.
+
+\section{Security }
 \end{document}
