@@ -1,9 +1,11 @@
-\documentclass{IEEEconf}
+\documentclass[conference]{IEEEtran}
 \usepackage{amsmath, amssymb}
 
 \newtheorem{theorem}{Theorem}
-\title{AcBF: A Revokable Blockchain-based Identity Management Scheme for Extremely Low-Latency Authentication Scenarios}
-\author{Jianan Hong, Jia Cheng, Chuan Zhang, Tong Wu, Yue Wu}
+\newtheorem{lemma}{Lemma}[theorem]
+
+\title{AcBF: A Revokable Blockchain-based Identity Management Enabling Low-Latency Authentication}
+\author{Jianan Hong, Jia Cheng, Chuan Zhang, Tong Wu, Jiayue Zhou, and Yue Wu}
 \begin{document}
 \maketitle
 
@@ -41,7 +43,7 @@ The length of Bloom Filter in this paper can be dramatically decreased compared 
 Let $n, \delta$ be the possible maximal number of registered and revoked users, respectively. The remaining factor is system effect of user revocation: when revocation is executed in one consensus round, the expected affected users should be limited to $\theta$, which can be measured as the member amount of Accumulator $\Delta$. The measurement is feasible as:
 \begin{itemize}
     \item Larger member amount in $\Delta$ causes larger probability that a user to be revoked has already in $\Delta$ and more other members to update their auxiliary information as \eqref{xxx}.
-    \item The probability that innocent users applies for accumulator member affects the increase rate of $\Delta$'s member, and this is also an effect to minimize.
+    \item The probability that innocent users applies for accumulator member affects the increase rate of $\theta$. Thus, $\theta$ also implies the effect when revocation is executed just in bloom filter.
 \end{itemize}
 
 Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom filter. With $\delta$ users already be revoked, the probability can be measured as follows, that an legal user is erroneously claimed as a revoked one: 
@@ -60,8 +62,31 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 \end{align}
 
 \section{Security Analysis of AcBF}
-\begin{theorem}
-	The AcBF identity management achieves sound and efficient user authentication for the lightweight-node verifier.
+\begin{theorem}\label{theo:security}
+	The AcBF identity management achieves sound and revocation-detectable user authentication for the lightweight-node verifier.
 \end{theorem}
+
+\begin{IEEEproof}
+    A user without a registered certificate in public ledger (even without a revoked identity) will not forge an authentication due to the traditional certificate technique with trust SPV method. Thus, this proof mainly focuses on the revoked user. Formally, this theorem holds if a revoked user $\mathcal{A}$ wins the following challenges with negligible advantage.
+    \begin{enumerate}
+        \item With the knowledge of accumulator value $\Delta$, as well as any pair of other user's accumulator pair from authentication message \ref{section:authentication}, $\mathcal{A}$ tries to forge its auxiliary value.
+        \item When $\mathcal{A}$ goes through a revocation based on member delete in $\Delta$, it tries to forge a new auxiliary value for the updated $\Delta$.
+        \item When $\mathcal{A}$ is revoked in block $j$, it tries to hide the revocation fact during the broadcast of block header.
+    \end{enumerate}
+
+    The first 2 challenges require a secure cryptographic accumulator, and a strong blockchain protocol is in need for the last challenge. Hence, the demonstration of Theorem \ref{theo:security} can be derived from the following 2 lemmas.
+\end{IEEEproof}
+\begin{lemma}
+    accumulator
+\end{lemma}
+
+\begin{lemma}
+    blockchain
+\end{lemma}
+
+\section{Performance Evaluation}
+
+Compared with entire bloom filter with distinct parameters.
+
 \section{Related Works}
 \end{document}
