@@ -1,6 +1,8 @@
 \documentclass{IEEEconf}
 \usepackage{amsmath, amssymb}
-\title{A Revokable Blockchain-based Identity Management Scheme for Extremely Low-Latency Authentication Scenarios}
+
+\newtheorem{theorem}{Theorem}
+\title{AcBF: A Revokable Blockchain-based Identity Management Scheme for Extremely Low-Latency Authentication Scenarios}
 \author{Jianan Hong, Jia Cheng, Chuan Zhang, Tong Wu, Yue Wu}
 \begin{document}
 \maketitle
@@ -22,27 +24,44 @@ Transactions \dots
 
 
 \subsection{System Procedures}
+\subsubsection{Initialization}
+xxx
 
+\subsubsection{Certificate Register}
+xxx
+
+
+
+\subsubsection{Revocation}
 
 \subsection{Parameter Determine for Bloom Filter}
 
 The length of Bloom Filter in this paper can be dramatically decreased compared with other schemes for certificate revocation. This section gives a theoretical derivation for the relevant parameter.
 
-Let $n, \delta$ be the possible maximal number of registered and revoked users, respectively. The remaining factor is system effect of user revocation: when revocation is executed in one consensus round, the expected affected users should be limited to $\theta$, which can be  measured as the member amount of Accumulator $\Delta$. The measurement is feasible as:
+Let $n, \delta$ be the possible maximal number of registered and revoked users, respectively. The remaining factor is system effect of user revocation: when revocation is executed in one consensus round, the expected affected users should be limited to $\theta$, which can be measured as the member amount of Accumulator $\Delta$. The measurement is feasible as:
 \begin{itemize}
-    \item If the revoked user was once a member of accumulator, its revocation 
-    \item Otherwise, the revoked user was ..., it may result in new legal user to apply for accumulator. 
+    \item Larger member amount in $\Delta$ causes larger probability that a user to be revoked has already in $\Delta$ and more other members to update their auxiliary information as \eqref{xxx}.
+    \item The probability that innocent users applies for accumulator member affects the increase rate of $\Delta$'s member, and this is also an effect to minimize.
 \end{itemize}
 
-Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom filter. With $\delta$ users already be revoked, the probability can be measured as follows, that an unrevoked user is erroneously claimed as revoked  
+Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom filter. With $\delta$ users already be revoked, the probability can be measured as follows, that an legal user is erroneously claimed as a revoked one: 
 \begin{align} 
     \Pr(1) \simeq (1 - e^{-k\delta/m})^k 
  \end{align}
 
 The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \frac{m}{\delta}\ln 2$. Then, for $n$ valid users, the expected ... (limited to $\theta$) is 
+\begin{align}\label{eq:bloomfilter}
+    \theta = n \cdot (1 - e^{-k\delta/m})^{k} = 0.5^{\frac{m}{\delta}\ln 2}\cdot n
+\end{align}
+From \eqref{eq:bloomfilter}, the parameters of Bloom filter can be determined as 
 \begin{align}
-    \theta = n \cdot (1 - e^{-k\delta/m})^{k} = 0.5^{\frac{m}{\delta}\ln 2}
+m = & \frac{\ln \frac{n}{\theta} \cdot \delta}{(\ln 2)^2} \simeq 2.08\delta \cdot\ln \frac{n}{\theta}\\
+k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{n}{\theta} \rceil
 \end{align}
 
-\section{Security }
+\section{Security Analysis of AcBF}
+\begin{theorem}
+	The AcBF identity management achieves sound and efficient user authentication for the lightweight-node verifier.
+\end{theorem}
+\section{Related Works}
 \end{document}
