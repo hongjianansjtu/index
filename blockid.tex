@@ -10,7 +10,7 @@
 \maketitle
 
 \section{Introduction}
-Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust estabilishment. Compared with traditional identity system, such as PKI (public key infrastructure), the characture of blockchain-based method suits better in current and future network systems, where
+Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, where
 
 \section{Construction}
 \subsection{Revocation-Aware Block Format}
@@ -18,7 +18,22 @@ The block structure in this paper is desgined to make lightweight node aware of 
 
 Block header \dots
 
-[Two flag bits, consensus field is modeled as a PoW method]
+\begin{table}[h]
+	\caption{Block Header Format}\label{table:format}
+	\centering
+	\begin{tabular}{c|c|l}
+		\hline
+		Field & Size & Description \\
+		\hline
+		Height & 4 bytes & A xxxx \\
+		Previous Hash & 24 bytes & A hash of previous block \\
+		Flag & 1 bit & Indication of revocation \\
+		MHT & 24 bytes & Hash of all transactions in this block \\
+		\hline
+	\end{tabular}
+\end{table}
+
+[A flag bit, consensus field is modeled as a PoW method]
 
 Transactions \dots
 
@@ -39,11 +54,9 @@ xxx
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 	\caption{Revocation Procedure of rCA}\label{alg:cap}
 	\begin{algorithmic}[1]
-		\Require $\mathbb{R}$ \Comment{Set of user indexes to be revoked}
-		\Ensure $y = x^n$
-		\State $y \gets 1$
-		\State $X \gets x$
-		\State $N \gets n$
+		\Require $\mathbb{R}$ and CRL %\Comment{Set of user indexes to be revoked}
+		\Ensure Revocation Transaction
+		\State $L= \emptyset$
 		\While{$x \in \mathbb{R}$}
 		\If{$BF.Check(x)$}
 		\State update $\Delta$
