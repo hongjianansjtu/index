@@ -1,6 +1,6 @@
 \documentclass[conference]{IEEEtran}
 \usepackage{amsmath, amssymb}
-
+\usepackage{algorithm, algpseudocode}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}[theorem]
 
@@ -33,9 +33,31 @@ xxx
 xxx
 
 
-
 \subsubsection{Revocation}
 
+\begin{algorithm}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+	\caption{Revocation Procedure of rCA}\label{alg:cap}
+	\begin{algorithmic}[1]
+		\Require $\mathbb{R}$ \Comment{Set of user indexes to be revoked}
+		\Ensure $y = x^n$
+		\State $y \gets 1$
+		\State $X \gets x$
+		\State $N \gets n$
+		\While{$x \in \mathbb{R}$}
+		\If{$BF.Check(x)$}
+		\State update $\Delta$
+		\State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+		\ElsIf{$N$ is odd}
+		\State $y \gets y \times X$
+		\State $N \gets N - 1$
+		\EndIf
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Block Generate and Broadcast}
+The consensus nodes collect certificate register and revocation transactions 
 \subsection{Parameter Determine for Bloom Filter}
 
 The length of Bloom Filter in this paper can be dramatically decreased compared with other schemes for certificate revocation. This section gives a theoretical derivation for the relevant parameter.
