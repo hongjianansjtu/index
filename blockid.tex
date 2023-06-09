@@ -15,10 +15,23 @@ Blockchain is an attractive technology for distributed identity management due t
 \section{Preliminaries}
 
 \subsection{Bilinear Pairing}
+Let $\mathbb{G}_1$, $\mathbb{G}_2$ and $\mathbb{G}_T$ be 3 groups of prime order $p$. A pairing map $e:\mathbb{G}_1\times \mathbb{G}_2\rightarrow\mathbb{G}_T$ satisfies:
+\begin{itemize}
+	\item \textit{Bilinearity:} for all $(x,y, g_1, g_2) \in \mathbb{Z}_p^2\times \mathbb{G}_1\times \mathbb{G}_2$, $e(g_1^x, g_2^y) = e(g_1, g_2)^{xy}$;
+	\item \textit{Non-degeneracy:} if $g_1, g_2$ are generators of $\mathbb{G}_1$ and $\mathbb{G}_2$, respectively, $e(g_1, g_2)$ generates $\mathbb{G}_T$;
+	\item \textit{Efficiency:} It is efficient to compute $e(u,v)$ for all $(u, v) \in \mathbb{G}_1\times \mathbb{G}_2$.
+\end{itemize}
+
+According to the relationship of $\mathbb{G}_1$ and $\mathbb{G}_2$, there are three types of pairings. 
+In Type 1, $\mathbb{G}_1 = \mathbb{G}_2$; In Type 2, $\mathbb{G}_1 \neq \mathbb{G}_2$, but there is a unidirectional homomorphism $\phi:\mathbb{G}_2 \rightarrow \mathbb{G}_1$; An in Type 3, no PPT homomorphism algorithm exists between the two groups.
+Overall speaking, Type 3 pairings are more secure and efficient to map, which is used in this paper.
 
 [Concept and security assumptions]
 
 \subsection{Bloom Filter}
+Bloom filter is a space-efficient data structure to record a set, in order to support membership queries \cite{broder2004network}.
+
+[$BF.Check(x), BF.Add(x)$]
 
 \section{System and Security Model}
 
@@ -42,7 +55,7 @@ The consensus filed depends on the used consensus method, e.g., it is a nonce fo
 		Previous Hash & 24 bytes & A hash of previous block \\
 		Flag & 1 bit & Indication of revocation \\
 		MHT & 24 bytes & Hash of all transactions in this block \\
-		Consensus & \ref{uuu} & Some method proving the validity of block\\
+		Consensus & \textit{variable} & Some method proving the validity of block\\
 		\hline
 	\end{tabular}
 \end{table}
@@ -64,17 +77,20 @@ xxx
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 	\caption{Revocation Procedure of rCA}\label{alg:cap}
 	\begin{algorithmic}[1]
-		\Require $\mathbb{R}$ and CRL %\Comment{Set of user indexes to be revoked}
+		\Require $\mathbb{R}$ and $\mathbb{R}_x$ %\Comment{Set of user indexes to be revoked}
 		\Ensure Revocation Transaction
-		\State $L= \emptyset$
+		\State $L\gets \emptyset$
+		\State $BF_{tmp} \gets 0^m$ \Comment{Empty bloom filter}
 		\While{$x \in \mathbb{R}$}
 		\If{$BF.Check(x)$}
 		\State update $\Delta$
 		\State $N \gets \frac{N}{2}$  \Comment{This is a comment}
 		\Else
-		\State BF
+		\State $BF_{tmp}.Add(x)$
 		\EndIf
 		\EndWhile
+		\State $BF \gets BF \lor BF_{tmp}$
+		\State $\mathbb{R}_x \gets \mathbb{R}_x \bigcup \mathbb{R} $
 	\end{algorithmic}
 \end{algorithm}
 
@@ -133,4 +149,8 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 Compared with entire bloom filter with distinct parameters.
 
 \section{Related Works}
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{id}
 \end{document}
