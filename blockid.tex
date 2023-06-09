@@ -12,32 +12,42 @@
 \section{Introduction}
 Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, where
 
+\section{Preliminaries}
+
+\subsection{Bilinear Pairing}
+
+[Concept and security assumptions]
+
+\subsection{Bloom Filter}
+
+\section{System and Security Model}
+
 \section{Construction}
 \subsection{Revocation-Aware Block Format}
-The block structure in this paper is desgined to make lightweight node aware of critical ledger status, e.g., user revocation. 
+The block structure in this paper is basically similar to that of Bitcoin, except for the consideration of lightweight node awareness. Firstly, the storage cost of block header should be as short as possible with efficient query and sacrificing no security feature; Secondly, the block header alone can prompt every certificate revocation clearly. 
 
-Block header \dots
+Taking into account the two issues, we redesign the 1) fields of block header, and 2) the tree structure of transactions. The header is a fixed length data, such that an unstructured storage can support fast addressing based on block height. The necessary fields are depicted in Table \ref{table:format}. Especially, as our later implementation uses 192-bit hash function and curves, the presented sizes of Previous hash and MHT (hash of merkle hash tree) are 24 bytes. The Flag filed is a main difference for the second consideration: it is a boolean variable to notify whether revocation events occur in this round.
 
-\begin{table}[h]
+The consensus filed depends on the used consensus method, e.g., it is a nonce for puzzle-like consensus method like PoW, or digital signature for permission-based consensus.
+
+
+\begin{table}[h] 
 	\caption{Block Header Format}\label{table:format}
 	\centering
 	\begin{tabular}{c|c|l}
 		\hline
 		Field & Size & Description \\
 		\hline
-		Height & 4 bytes & A xxxx \\
+		Height & 4 bytes & An incremental integer to identify this block \\
 		Previous Hash & 24 bytes & A hash of previous block \\
 		Flag & 1 bit & Indication of revocation \\
 		MHT & 24 bytes & Hash of all transactions in this block \\
+		Consensus & \ref{uuu} & Some method proving the validity of block\\
 		\hline
 	\end{tabular}
 \end{table}
 
-[A flag bit, consensus field is modeled as a PoW method]
-
-Transactions \dots
-
-[transactions are structured as normal MHT if no revocation happens. When any flag is ..., the difference is introduced]
+All registered certificates (regarded as transactions) are structured in merkle hash tree as Section \ref{section:mht}, whose hash of root node is represented as $R_c$. There is also a slight difference for revocation awareness: if there is no revocation, $R_c$ is just the value of MHT; otherwise, MHT is assigned the hash of $R_a$ and the revocation transaction in this block (denoted as $R_x$). For certificates registered in this block, their SPV data includes $R_x$ in such case.
 
 
 \subsection{System Procedures}
