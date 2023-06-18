@@ -5,7 +5,7 @@
 \newtheorem{lemma}{Lemma}[theorem]
 
 \title{AcBF: A Revokable Blockchain-based Identity Management Enabling Low-Latency Authentication}
-\author{Jianan Hong, Jia Cheng, Chuan Zhang, Tong Wu, Jiayue Zhou, and Yue Wu}
+\author{Jianan Hong, Jia Cheng, Chuan Zhang, Jiayue Zhou, and Yue Wu}
 \begin{document}
 \maketitle
 
@@ -22,16 +22,23 @@ Let $\mathbb{G}_1$, $\mathbb{G}_2$ and $\mathbb{G}_T$ be 3 groups of prime order
 	\item \textit{Efficiency:} It is efficient to compute $e(u,v)$ for all $(u, v) \in \mathbb{G}_1\times \mathbb{G}_2$.
 \end{itemize}
 
-According to the relationship of $\mathbb{G}_1$ and $\mathbb{G}_2$, there are three types of pairings. 
+According to the relationship of $\mathbb{G}_1$ and $\mathbb{G}_2$, there are three types of pairings \cite{GALBRAITH20083113}. 
 In Type 1, $\mathbb{G}_1 = \mathbb{G}_2$; In Type 2, $\mathbb{G}_1 \neq \mathbb{G}_2$, but there is a unidirectional homomorphism $\phi:\mathbb{G}_2 \rightarrow \mathbb{G}_1$; An in Type 3, no PPT homomorphism algorithm exists between the two groups.
 Overall speaking, Type 3 pairings are more secure and efficient to map, which is used in this paper.
 
 [Concept and security assumptions]
 
 \subsection{Bloom Filter}
-Bloom filter is a space-efficient data structure to record a set, in order to support membership queries \cite{broder2004network}.
+Bloom filter (or BF for short) is a space-efficient data structure to record a set, in order to support membership queries \cite{Bloom1970, broder2004network}.
+BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted as $0^m$). Another parameter $k$ is the number of independent hashes, each of which maps a member to a random bit of BF. The follows describe the functions of BF, which are to be used in the later context.
 
-[$BF.Check(x), BF.Add(x)$]
+\begin{itemize}
+    \item $BF.Add(x)$: To add an element $x$ to BF, it respectively hashes $x$ with the $k$ hashes of BF, and sets each of the mapped bit to 1.
+	\item $BF.Check(x)$: To query if $x$ has been added, it uses the $k$ hashes to map $x$ to a set of bits. If any of them is 0, it returns False; otherwise, it returns True. 
+\end{itemize}
+
+The $BF.Check()$ gives a False result with no doubt; whereas the True result has the potential to happen when the tested element has not been added, which means a false positive situation.
+
 
 \section{System and Security Model}
 
@@ -81,14 +88,13 @@ xxx
 		\Ensure Revocation Transaction
 		\State $L\gets \emptyset$
 		\State $BF_{tmp} \gets 0^m$ \Comment{Empty bloom filter}
-		\While{$x \in \mathbb{R}$}
+		\ForAll{$x \in \mathbb{R}$}
 		\If{$BF.Check(x)$}
-		\State update $\Delta$
-		\State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+		\State $\Delta \gets Del(\Delta, x)$ \Comment{Section \ref{xxx}}
 		\Else
 		\State $BF_{tmp}.Add(x)$
 		\EndIf
-		\EndWhile
+		\EndFor
 		\State $BF \gets BF \lor BF_{tmp}$
 		\State $\mathbb{R}_x \gets \mathbb{R}_x \bigcup \mathbb{R} $
 	\end{algorithmic}
