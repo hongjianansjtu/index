@@ -10,7 +10,8 @@
 \maketitle
 
 \section{Introduction}
-Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems. Its decentralized deployment and non-tempering ledger can trustfully organize the trust for large amount of entities, particularly the trust relationship between CAs (certificate authorities). Therefore, the idea of blockchain-based identity can develop various network scenarios, including Internet of Thing (IoT), Internet of Vehicles (IoV), etc., where decentralized trust is critically required.
+Blockchain is an attractive technology for distributed identity management \cite{blockid} due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, due to its ability to faithfully organize the trust for large amount of entities \cite{certchain2018}, particularly the trust relationship between CAs (certificate authorities). 
+Therefore, the idea of blockchain-based identity can develop security for various network scenarios, including Internet of Thing (IoT) \cite{iot}, Internet of Vehicles (IoV)  \cite{iot}, etc., where decentralized trust is critically required.
 
 \section{Preliminaries}
 
@@ -41,6 +42,8 @@ Especially, the $BF.Check()$ gives a False result with no doubt; whereas the Tru
 
 
 \section{System and Security Model}
+The proposed scheme works in a communication system with the following 3 kines of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. Their relationship is shown as Fig. \ref{architecture}. 
+
 
 \section{Construction}
 \subsection{Revocation-Aware Block Format}
@@ -150,8 +153,12 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 \end{lemma}
 
 \begin{lemma}
-    If the consensus protocol is safe, the lightweight node is aware of every revocation when its ledger has \dots
+    If the consensus protocol of the used blockchain is safe, the lightweight node is aware of every revocation when its ledger has been updated to relevant status.
 \end{lemma}
+
+\begin{IEEEproof}
+When a certificate is successfully revoked in a block (e.g., of height $i$), the Flag field of its header should be \textit{True}. As long as the consensus protocol has a strong safety property, the lightweight node will not accept the $i$-th block header with Flag field \textit{False}. 
+\end{IEEEproof}
 
 \section{Performance Evaluation}
 
