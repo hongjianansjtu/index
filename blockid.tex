@@ -10,7 +10,7 @@
 \maketitle
 
 \section{Introduction}
-Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, where
+Blockchain is an attractive technology for distributed identity management due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems. Its decentralized deployment and non-tempering ledger can trustfully organize the trust for large amount of entities, particularly the trust relationship between CAs (certificate authorities). Therefore, the idea of blockchain-based identity can develop various network scenarios, including Internet of Thing (IoT), Internet of Vehicles (IoV), etc., where decentralized trust is critically required.
 
 \section{Preliminaries}
 
@@ -37,7 +37,7 @@ BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted a
 	\item $BF.Check(x)$: To query if $x$ has been added, it uses the $k$ hashes to map $x$ to a set of bits. If any of them is 0, it returns False; otherwise, it returns True. 
 \end{itemize}
 
-The $BF.Check()$ gives a False result with no doubt; whereas the True result has the potential to happen when the tested element has not been added, which means a false positive situation.
+Especially, the $BF.Check()$ gives a False result with no doubt; whereas the True result has the potential to happen when the tested element has not been added, which means a false positive situation.
 
 
 \section{System and Security Model}
@@ -46,9 +46,9 @@ The $BF.Check()$ gives a False result with no doubt; whereas the True result has
 \subsection{Revocation-Aware Block Format}
 The block structure in this paper is basically similar to that of Bitcoin, except for the consideration of lightweight node awareness. Firstly, the storage cost of block header should be as short as possible with efficient query and sacrificing no security feature; Secondly, the block header alone can prompt every certificate revocation clearly. 
 
-Taking into account the two issues, we redesign the 1) fields of block header, and 2) the tree structure of transactions. The header is a fixed length data, such that an unstructured storage can support fast addressing based on block height. The necessary fields are depicted in Table \ref{table:format}. Especially, as our later implementation uses 192-bit hash function and curves, the presented sizes of Previous hash and MHT (hash of merkle hash tree) are 24 bytes. The Flag filed is a main difference for the second consideration: it is a boolean variable to notify whether revocation events occur in this round.
+Taking into account the two issues, we redesign the 1) fields of block header, and 2) the tree structure of transactions. The header is a fixed length data, such that an unstructured storage can support fast addressing based on block height. The necessary fields are depicted in Table \ref{table:format}. Especially, as our later implementation uses 224-bit hash function and curves, the presented sizes of Previous hash and MHT (hash of merkle hash tree) are 28 bytes. The Flag filed is a main difference for the second consideration: it is a boolean variable to notify whether revocation events occur in this round.
 
-The consensus filed depends on the used consensus method, e.g., it is a nonce for puzzle-like consensus method like PoW, or digital signature for permission-based consensus.
+The consensus filed depends on the used consensus method, e.g., it is a nonce for puzzle-like consensus method like PoW, or a digital signature for permission-based consensus.
 
 
 \begin{table}[h] 
@@ -59,15 +59,15 @@ The consensus filed depends on the used consensus method, e.g., it is a nonce fo
 		Field & Size & Description \\
 		\hline
 		Height & 4 bytes & An incremental integer to identify this block \\
-		Previous Hash & 24 bytes & A hash of previous block \\
+		Previous Hash & 28 bytes & A hash of previous block \\
 		Flag & 1 bit & Indication of revocation \\
-		MHT & 24 bytes & Hash of all transactions in this block \\
+		MHT & 28 bytes & Hash of all transactions in this block \\
 		Consensus & \textit{variable} & Some method proving the validity of block\\
 		\hline
 	\end{tabular}
 \end{table}
 
-All registered certificates (regarded as transactions) are structured in merkle hash tree as Section \ref{section:mht}, whose hash of root node is represented as $R_c$. There is also a slight difference for revocation awareness: if there is no revocation, $R_c$ is just the value of MHT; otherwise, MHT is assigned the hash of $R_a$ and the revocation transaction in this block (denoted as $R_x$). For certificates registered in this block, their SPV data includes $R_x$ in such case.
+All registered certificates (regarded as transactions) are structured in merkle hash tree as Section \ref{section:mht}, whose hash of root node is represented as $R_c$. There is also a slight difference for revocation awareness: if there is no revocation, $R_c$ is just the value of MHT; otherwise, MHT is assigned the hash of $R_a$ and the signature of revocation transaction in this block (denoted as $R_x$). For certificates registered in this block, their SPV data includes $R_x$ in such case.
 
 
 \subsection{System Procedures}
@@ -84,25 +84,28 @@ xxx
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 	\caption{Revocation Procedure of rCA}\label{alg:cap}
 	\begin{algorithmic}[1]
-		\Require $\mathbb{R}$ and $\mathbb{R}_x$ %\Comment{Set of user indexes to be revoked}
-		\Ensure Revocation Transaction
+		\Require $\mathbb{R}$, $\mathbb{R}_x$, $BF$ and $\Delta$ %\Comment{Set of user indexes to be revoked}
+		\Ensure Revocation Transaction ($rx$)
 		\State $L\gets \emptyset$
+		%\State $\Delta_T \gets \Delta$
 		\State $BF_{tmp} \gets 0^m$ \Comment{Empty bloom filter}
 		\ForAll{$x \in \mathbb{R}$}
-		\If{$BF.Check(x)$}
-		\State $\Delta \gets Del(\Delta, x)$ \Comment{Section \ref{xxx}}
+		\If{$BF.Check(x)$} %\Comment{revoke it from $\Delta$}
+		\State $\Delta \gets Del(\Delta, x)$ 
+		\State append $(x, \Delta)$ to L
 		\Else
 		\State $BF_{tmp}.Add(x)$
 		\EndIf
 		\EndFor
 		\State $BF \gets BF \lor BF_{tmp}$
 		\State $\mathbb{R}_x \gets \mathbb{R}_x \bigcup \mathbb{R} $
+		\State $rx \gets (L, \mathbb{R})$
 	\end{algorithmic}
 \end{algorithm}
 
 \subsubsection{Block Generate and Broadcast}
 The consensus nodes collect certificate register and revocation transactions 
-\subsection{Parameter Determine for Bloom Filter}
+\subsection{Parameter Determine for Bloom Filter} \label{section:parameter}
 
 The length of Bloom Filter in this paper can be dramatically decreased compared with other schemes for certificate revocation. This section gives a theoretical derivation for the relevant parameter.
 
