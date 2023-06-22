@@ -10,10 +10,18 @@
 \maketitle
 
 \section{Introduction}
-Blockchain is an attractive technology for distributed identity management \cite{blockid} due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, due to its ability to faithfully organize the trust for large amount of entities \cite{certchain2018}, particularly the trust relationship between CAs (certificate authorities). 
-Therefore, the idea of blockchain-based identity can develop security for various network scenarios, including Internet of Thing (IoT) \cite{iot}, Internet of Vehicles (IoV)  \cite{iot}, etc., where decentralized trust is critically required. 
+Blockchain is an attractive technology for distributed identity management \cite{9075663} due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, due to its ability to faithfully organize the trust for large amount of entities \cite{certchain2018,yang2018blockchain}, particularly the trust relationship between CAs (certificate authorities). 
+Therefore, the idea of blockchain-based identity can develop security for various network scenarios, including Internet of Thing (IoT) \cite{zhangBPAFBlockchainEnabledReliable2022a}, Internet of Vehicles (IoV)  \cite{8010820,singh2018branch}, etc., where decentralized trust is critically required. 
 
-Despite the decentralized trust organization introduced by blockchain, it also brings in many practical problems due to its certificate status query method. For blockchain-based identity, a certificate's status (e.g., registered, illegal, or revoked) should be queried from the ledger of blockchain, which is maintained by multiple blockchain nodes
+Despite the decentralized trust organization introduced by blockchain, it also brings in many practical problems due to its certificate status query method. For blockchain-based identity, a certificate's status (e.g., registered, illegal, or revoked) should be queried from the ledger of blockchain, which is maintained by multiple blockchain nodes. That is the cause of problems or security threats for communication resource-constrained scenarios. Firstly, the transaction query requires several round trip time (RTT) between IoT devices (or vehicle) and at least one blockchain node, which costs unbearable delay for latency-strict cases, e.g., safety notification message of IoV; what is worse, the highly dynamic topology of these network system makes the routing of query response complex. Secondly, query certificate's status from only one node is dangerous, which leads to the security bottleneck problem; and it makes the first problem even worse to refer to more blockchain nodes. A worse threat is that some network attack will isolate the device from legal blockchain nodes at the very time when the device needs to check a certificate. 
+It is intuitive but infeasible to let every device keep up with the whole ledger of blockchain, since the distributed devices are lightweight nodes for resources, especially storage. 
+
+This paper proposes a blockchain-based identity management scheme by deploying lightweight blockchain nodes. Rather than stores the whole data, a lightweight node only stores the block header information of each block, thus help the storage-constrained devices to check transaction status locally, with the method of \textit{simplified payment verification} (SPV). As a result, the validity check of identity is completed with extremely low latency, regardless of the communication quality or network attack. 
+
+The property of lightweight node has attracted many researchers to deploy blockchain in IoT, industrial environments, etc.. However, we should take more issues into account, before utilizing it to manage users' and devices' identities. The core problem is revocation! Let us take the following instance: a user's $U$ identity is registered in block $i$, and is later revoked in block $j$. If $U$ wants to authenticate its identity to a lightweight node, it can easily succeed in this forge: as $U$'s certificate still has a valid SPV method for block $i$, and the lightweight node is not informed of the revocation based on the stored block headers, unless $U$ consciously hands it up. Although some blockchain-based identity management schemes have proposed well designed revocation method \cite{luoScalaCertScalabilityOrientedPKI2022a, xchameleon, accumulator, bloom}, they no longer work in our system, as they require the verifier to master the whole blockchain data. 
+
+
+
 
 \section{Preliminaries}
 
@@ -44,7 +52,7 @@ Especially, the $BF.Check()$ gives a False result with no doubt; whereas the Tru
 
 
 \section{System and Security Model}
-The proposed scheme works in a communication system with the following 3 kines of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. Their relationship is shown as Fig. \ref{architecture}. 
+The proposed scheme works in a communication system with the following 3 kinds of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. Their relationship is shown as Fig. \ref{architecture}. 
 
 
 \section{Construction}
