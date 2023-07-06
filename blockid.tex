@@ -20,13 +20,13 @@ This paper proposes a blockchain-based identity management scheme by deploying l
 
 The property of lightweight node has attracted many researchers to deploy blockchain in IoT, industrial environments, etc.. However, we should take more issues into account, before utilizing it to manage users' and devices' identities. The core problem is revocation! Let us take the following instance: a user's $U$ identity is registered in block $i$, and is later revoked in block $j$. If $U$ wants to authenticate its identity to a lightweight node, it can easily succeed in this forge: as $U$'s certificate still has a valid SPV method for block $i$, and the lightweight node is not informed of the revocation based on the stored block headers, unless $U$ consciously hands it up. Although some blockchain-based identity management schemes have proposed well designed revocation method \cite{luoScalaCertScalabilityOrientedPKI2022a, xchameleon, accumulator, bloom}, they no longer work in our system, as they require the verifier to master the whole blockchain data. 
 
-The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging.
+The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. 
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
-	\item We propose a lightweight on-chain certificate management mechanism, where the authentication phase costs negligible overhead to validate the status of the certificate. Specially, the CRL structure composed by designed accumulator-assisted bloom filter, thus the filter length can be drastically shortened without the problem of [xxxxxxxx]. 
+	\item We propose a lightweight on-chain certificate management, where the authentication phase costs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by designed accumulator-assisted bloom filter, thus the filter length can be drastically shortened without the problem of false detection. 
 	\item To the best of our knowledge, we enable low-latency and trusted authentication by constructing a blockchain scheme (AcBF), which makes the lightweight node be aware of revocation event according to block header. As a result, the identity status can be queried locally by the resource-constrained verifiers.
-	\item We implement AcBF in our tested environment, and evaluate its performance in terms of xxxxxxx. Results show that AcBF informs every revocation to lightweight node, even in untrust network environment. The measuring result shows that overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
+	\item We implement AcBF in our tested environment, and evaluate its performance in terms of computation and storage overhead in various procedures. Results show that AcBF informs every revocation to lightweight node, even in untrust network environment, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
 \end{enumerate}
 
 The rest of this paper is organized as follows. 
