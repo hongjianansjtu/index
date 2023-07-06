@@ -5,9 +5,17 @@
 \newtheorem{lemma}{Lemma}[theorem]
 
 \title{AcBF: A Revokable Blockchain-based Identity Management Enabling Low-Latency Authentication}
-\author{Jianan Hong, Jia Cheng, Chuan Zhang, Jiayue Zhou, and Yue Wu}
+\author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, and Yue Wu}
 \begin{document}
 \maketitle
+
+\begin{abstract}
+	Blockchain-based identity has brings great evolution due to its decentralized deployment, transparent and tamper-free ledger. Specification groups of B5G/6G are exploring approaches to integrate the technology to future network systems, e.g., Internet of Things, vehicular network, industrial communications. Note that devices in these systems are storage constrained with instable channels, thus requires lightweight node deployment. The security problem comes: revoked identity can forge a legitimate authentication, since the lightweight verifier does not maintain the revocation transactions. 
+	This paper hence proposes AcBF, a novel revokable identity management scheme. Especially, it enables extremely low authentication latency by allowing the lightweight node to query certificate's status locally. To realize this feature trustly, we first design a revocation transaction based on accumulator-assisted bloom filter to minimize the storage of certificate status structure. Secondly, we further construct the blockchain protocol, with which, no revocation event will slip on any lightweight ledger, even in an insecure or instable communication environment.  
+	In addition, different with other no-CRL revocation mechanism, AcBF brings very small effect to valid user to execute the revocation, with quite a small probability.
+	Security and performance analysis
+	shows that AcBF has sufficient security and advantageous efficiency on both lightweight verifiers and identity owners, thus suits identity management systems with low-latency constraints.
+\end{abstract}
 
 \section{Introduction}
 Blockchain is an attractive technology for distributed identity management \cite{9075663} due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, due to its ability to faithfully organize the trust for large amount of entities \cite{certchain2018,yang2018blockchain}, particularly the trust relationship between CAs (certificate authorities). 
@@ -25,7 +33,7 @@ The work presented in this paper aims at proposing a trusted blockchain-based id
 In summary, this paper makes the following contributions:
 \begin{enumerate}
 	\item We propose a lightweight on-chain certificate management, where the authentication phase costs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by designed accumulator-assisted bloom filter, thus the filter length can be drastically shortened without the problem of false detection. 
-	\item To the best of our knowledge, we enable low-latency and trusted authentication by constructing a blockchain scheme (AcBF), which makes the lightweight node be aware of revocation event according to block header. As a result, the identity status can be queried locally by the resource-constrained verifiers.
+	\item To the best of our knowledge, we are the first to enable low-latency and trusted authentication by constructing a blockchain scheme (AcBF), which makes the lightweight node be aware of revocation event according to block header. As a result, the identity status can be queried locally by the resource-constrained verifiers.
 	\item We implement AcBF in our tested environment, and evaluate its performance in terms of computation and storage overhead in various procedures. Results show that AcBF informs every revocation to lightweight node, even in untrust network environment, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
 \end{enumerate}
 
