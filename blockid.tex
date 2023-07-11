@@ -3,6 +3,7 @@
 \usepackage{algorithm, algpseudocode}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}[theorem]
+\newtheorem{definition}{Definition}
 
 \title{AcBF: A Revokable Blockchain-based Identity Management Enabling Low-Latency Authentication}
 \author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, and Yue Wu}
@@ -31,7 +32,7 @@ This paper proposes a blockchain-based identity management scheme by deploying l
 
 The property of lightweight node has attracted many researchers to deploy blockchain in IoT, industrial environments, etc.. However, we should take more issues into account, before utilizing it to manage users' and devices' identities. The core problem is revocation! Let us take the following instance: a user's $U$ identity is registered in block $i$, and is later revoked in block $j$. If $U$ wants to authenticate its identity to a lightweight node, it can easily succeed in this forge: as $U$'s certificate still has a valid SPV method for block $i$, and the lightweight node is not informed of the revocation based on the stored block headers, unless $U$ consciously hands it up. Although some blockchain-based identity management schemes have proposed well designed revocation method \cite{luoScalaCertScalabilityOrientedPKI2022a,  wang2020blockchain,jiaRedactableBlockchainDecentralized2022,chenCertchainPublicEfficient2018a}, they no longer work in our system, as they require the verifier to master the whole blockchain data. 
 
-The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. 
+The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. Different from related work, our work uses a short Bloom Filter to record the revoked certificates
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
@@ -57,7 +58,12 @@ According to the relationship of $\mathbb{G}_1$ and $\mathbb{G}_2$, there are th
 In Type 1, $\mathbb{G}_1 = \mathbb{G}_2$; In Type 2, $\mathbb{G}_1 \neq \mathbb{G}_2$, but there is a unidirectional homomorphism $\phi:\mathbb{G}_2 \rightarrow \mathbb{G}_1$; An in Type 3, no PPT homomorphism algorithm exists between the two groups.
 Overall speaking, Type 3 pairings are more secure and efficient to map, which is used in this paper.
 
-[Concept and security assumptions]
+Consider the $q$-Strong Diffie-Hellman Problem ($q$-SDH) as follows: given a tuple $(g_1, g_2, g_2^{\gamma}, g_2^{(\gamma^2)}, \dots, g_2^{(\gamma^q)})$ as input, where $g_1\in\mathbb{G}_1$, $g_2\in\mathbb{G}_2$, and $\gamma\in \mathbb{Z}_p$, outputs a pair $(g_1^{1/(\gamma + x)}, x)$ where $x \in \mathbb{Z}_p$. We say that an algorithm $\mathcal{A}$ has advantage $\epsilon$ in solving $q$-SDH if it has probability $\epsilon$ to return the valid pair.
+
+\begin{definition}[$q$-SDH Assumption]
+	No PPT algorithm $\mathcal{A}$ can has a non-negligible advantage $\epsilon$ for $q$-SDH problem.
+\end{definition}
+
 
 \subsection{Bloom Filter}
 Bloom filter (or BF for short) is a space-efficient data structure to record a set, in order to support membership queries \cite{Bloom1970, broder2004network}.
@@ -157,7 +163,7 @@ Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom fi
     \Pr(1) \simeq (1 - e^{-k\delta/m})^k 
  \end{align}
 
-The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \frac{m}{\delta}\ln 2$. Then, for $n$ valid users, the expected ... (limited to $\theta$) is 
+The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \frac{m}{\delta}\ln 2$. Then, for $n$ valid users, the expected affected amount (limited to $\theta$) is 
 \begin{align}\label{eq:bloomfilter}
     \theta = n \cdot (1 - e^{-k\delta/m})^{k} = 0.5^{\frac{m}{\delta}\ln 2}\cdot n
 \end{align}
