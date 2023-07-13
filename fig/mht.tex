@@ -1,0 +1,32 @@
+\documentclass{standalone}
+\usepackage{amsmath, amssymb}
+\usepackage{tikz}
+\begin{document}
+\usetikzlibrary{trees,positioning}
+\begin{tikzpicture}[transform shape, thick,
+    every node/.style = {draw, circle, minimum size = 8mm},
+    grow = down,  % alignment of characters
+    level 1/.style = {sibling distance=3.6cm},
+    level 2/.style = {sibling distance=1.8cm}, 
+    level 3/.style = {sibling distance=1.8cm}, 
+    level distance = 1.1cm, node distance = 0.5cm
+  ]
+    \node{$R$} 
+    child {node{$h_{0}$}
+        child {node [blue!70!black, very thick] {$h_{00}$}}
+        child {node (leafA) {$h_{01}$}}}
+    child {node[blue!70!black, very thick]{$h_{1}$}
+        child {node {$h_{10}$}}
+        child {node (Right) {$h_{11}$}}};
+    \node (certA) [draw, rectangle, rounded corners, below=of leafA, minimum size = 6mm] {$cert_A$};
+    \draw[->] (certA) to (leafA);
+    \node at (Right) [right = 1cm, text width = 5.5cm, rectangle, rounded corners, fill=red!20, draw = red!20, font=\small\slshape,inner sep = 1ex]
+    {If the relevant block is with height $k$, 
+    \begin{align}
+        A_{Loc} &= (k, 01)\\
+        AUX_A & = (h_{00}, h_1)
+    \end{align}
+    where $01$ is the path of $cert_A$.
+    };
+\end{tikzpicture}
+\end{document}

@@ -1,4 +1,6 @@
 \documentclass[conference]{IEEEtran}
+\usepackage{graphicx}
+\graphicspath{{fig/}}
 \usepackage{amsmath, amssymb}
 \usepackage{algorithm, algpseudocode}
 \newtheorem{theorem}{Theorem}
@@ -78,6 +80,22 @@ BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted a
 
 Especially, the $BF.Check()$ gives a False result with no doubt; whereas the True result has the potential to happen when the tested element has not been added, which means a false positive situation. 
 
+\subsection{Merkle Tree and Simplified Payment Verification (SPV)}
+\label{section:merkle}
+Merkle hash tree \cite{daiSBLWTSecureBlockchain2018} is essentially a binary tree where the leaf node is labeled a hash of a data block, and the non-leaf node is labeled with the hash of its child nodes. Such structure allows efficient verification of any large data. As shown in Fig. \ref{fig:mht}, $cert_A$ is labelled with the 2nd leaf of MHT, whose path is ``01'' (0 for left child and 1 for the right).
+
+Simplified payment Verification (SPV) is a method to check if one data block is in a MHT, when the verifier only knows the root node. To realize the verification, SPV requires the prover side to offer necessary auxiliary information to the verifier, which means the values of \textbf{all sibling nodes from the hash of proved data block to the root}.
+Return to Fig. \ref{fig:mht}, the auxiliary information of $cert_A$ is as: $AUX_A = (h_{00}, h_{1})$. Since each one obtaining the auxiliary as well as  $R$ can check if:
+\begin{align}\label{eq:aux}
+	R \overset{?}{=} h(h(h_{00}, h(cert_A)), h_1)
+\end{align}
+%where $h()$ is any selected secure hash function.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=9cm]{mht}
+	\caption{Architecture}\label{fig:mht}
+\end{figure}
 
 \section{System and Security Model} \label{sec:model}
 As shown in Fig. \ref{architecture}, the proposed scheme works in a communication system with the following 3 kinds of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. The follows describe each of the entities. 
@@ -116,17 +134,20 @@ All registered certificates (regarded as transactions) are structured in merkle 
 
 
 \subsection{System Procedures}
+
 \subsubsection{Initialization}
-The rCA initiates the system by generating a bilinear tuple $PP=\{p, \mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T, g_1, g_2, e\}$ and a hash function $H:\{0, 1\}^* \rightarrow \mathbb{Z}_p$. It selects its master secret key $\gamma\in \mathbb{Z}_p$, accumulator value $\Delta\in_R \mathbb{G}_1$, and parameters of Bloom filter $(m, k)$ as Section \ref{section:bf}, based on the expected system scale as Section \ref{section:parameter}. It further generates an empty revocation list $\mathbb{R}_x$. The system parameters are published as 
+The rCA initiates the system by generating a bilinear tuple $PP=\{p, \mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T, g_1, g_2, e\}$ and a hash function $H:\{0, 1\}^* \rightarrow \mathbb{Z}_p$. It selects its master secret key $\gamma\in \mathbb{Z}_p$, accumulator value $\Delta\in_R \mathbb{G}_1$, 
+and parameters of Bloom filter $(m, k)$ as Section \ref{section:bf}, based on the expected system scale as Section \ref{section:parameter}. It further generates an empty revocation list $\mathbb{R}_x$. The system parameters are published as 
 $$ \bigl\{ PP, \Delta, Y = g_2^\gamma, (m, k) \bigr\}$$
 
 Blockchain full nodes are gathered by generating a genesis block $B_0$, whose header's format follows Table \ref{table:format}, with all-zeros fields, except the consensus. 
 
-The iCAs are registered in the blockchain as Section \ref{section:register}. As a distributed system, iCA's certificates should be registered in self-sovereign manner, while our AcBF also supports rCA's issuing, by using key pair $(\gamma, Y)$ with BLS signature \cite{bls}. Note that, iCA's certificate status is queried like other entities', hence the later content will not specifically describe the iCA's status check in authentication phase. 
+The iCAs are registered in the blockchain as Section \ref{section:register}. As a distributed system, iCA's certificates should be registered in self-sovereign manner, while our AcBF also supports rCA's issuing, by using key pair $(\gamma, Y)$ with BLS signature \cite{boneh2004short}. Note that, iCA's certificate status is queried like other entities', hence the later content will not specifically describe the iCA's status check in authentication phase. 
 
 \subsubsection{Certificate Register}\label{section:register}
-xxx
+From an arbitrary trusted iCA, each entity $U_i$ applies this phase to register an on-chain certificate $cert_i$. The certificate in AcBF is basically similar to that in X.509, except that AcBF does not need the globally unique sequence number. Instead, AcBF uses its unique locate $i_{Loc} = (i_h, i_p)$ in blockchain to identify the certificate, where $i_h$ is denoted as the height of registered block, and $i_p$ is its path in MHT. 
 
+We should mention that $U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions) 
 
 \subsubsection{Revocation}
 
@@ -152,6 +173,7 @@ xxx
 		\State $rx \gets (L, \mathbb{R})$
 	\end{algorithmic}
 \end{algorithm}
+
 
 
 \subsubsection{Authentication}
