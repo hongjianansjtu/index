@@ -4,6 +4,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}[theorem]
 \newtheorem{definition}{Definition}
+\usepackage{hyperref}
 
 \title{AcBF: A Revokable Blockchain-based Identity Management Enabling Low-Latency Authentication}
 \author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, and Yue Wu}
@@ -32,7 +33,7 @@ This paper proposes a blockchain-based identity management scheme by deploying l
 
 The property of lightweight node has attracted many researchers to deploy blockchain in IoT, industrial environments, etc.. However, we should take more issues into account, before utilizing it to manage users' and devices' identities. The core problem is revocation! Let us take the following instance: a user's $U$ identity is registered in block $i$, and is later revoked in block $j$. If $U$ wants to authenticate its identity to a lightweight node, it can easily succeed in this forge: as $U$'s certificate still has a valid SPV method for block $i$, and the lightweight node is not informed of the revocation based on the stored block headers, unless $U$ consciously hands it up. Although some blockchain-based identity management schemes have proposed well designed revocation method \cite{luoScalaCertScalabilityOrientedPKI2022a,  wang2020blockchain,jiaRedactableBlockchainDecentralized2022,chenCertchainPublicEfficient2018a}, they no longer work in our system, as they require the verifier to master the whole blockchain data. 
 
-The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. The proposed work uses a short Bloom Filter to record the revoked certificates; and additionally leverages a pairing-based accumulator to achieve a precise certificate validity check, even with quite small storage. Different from related work, in order to tolerate the case when the forger controls the downlink channel (to obtain block header), we construst our new blockchain scheme (AcBF). In AcBF, with our designed revocation transaction and small-volume header structure, the lightweight verifier can be aware of the revocation events even with the received header, thus achieves local query to improve the efficiency and reliability.
+The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. The proposed work uses a short Bloom Filter to record the revoked certificates; and additionally leverages a pairing-based accumulator to achieve a precise certificate validity check, even with quite small storage. Different from related work, in order to tolerate the case when the forger controls the downlink channel (to obtain block header), we construst our new blockchain scheme (AcBF). In AcBF, with our designed revocation transaction and small-volume header structure, the lightweight verifier can be aware of the revocation events even with the received header, thus achieves local query to improve the efficiency and reliability. 
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
@@ -41,10 +42,11 @@ In summary, this paper makes the following contributions:
 	\item We implement AcBF in our tested environment, and evaluate its performance in terms of computation and storage overhead in various procedures. Results show that AcBF informs every revocation to lightweight node, even in untrust network environment, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
 \end{enumerate}
 
-The rest of this paper is organized as follows. 
+The rest of this paper is organized as follows. We will
+introduce necessary preliminaries in Section \ref{sec:preliminary}, and in Section \ref{sec:model} we present the system model, followed with the security requirements of AcBF. Detailed Construction is presented in Section \ref{sec:construction}. Then formal security proof and experimental result analysis are shown in Section \ref{sec:security} and \ref{sec:efficiency}, respectively. Section \ref{section:related} briefly discusses the related work. Finally, in Section \ref{sec:conclusion}, we conclude this paper. 
 
 
-\section{Preliminaries}
+\section{Preliminaries}\label{sec:preliminary}
 
 \subsection{Bilinear Pairing}
 Let $\mathbb{G}_1$, $\mathbb{G}_2$ and $\mathbb{G}_T$ be 3 groups of prime order $p$. A pairing map $e:\mathbb{G}_1\times \mathbb{G}_2\rightarrow\mathbb{G}_T$ satisfies:
@@ -65,7 +67,7 @@ Consider the $q$-Strong Diffie-Hellman Problem ($q$-SDH) as follows: given a tup
 \end{definition}
 
 
-\subsection{Bloom Filter}
+\subsection{Bloom Filter}\label{section:bf}
 Bloom filter (or BF for short) is a space-efficient data structure to record a set, in order to support membership queries \cite{Bloom1970, broder2004network}.
 BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted as $0^m$). Another parameter $k$ is the number of independent hashes, each of which maps a member to a random bit of BF. The follows describe the functions of BF, which are to be used in the later context.
 
@@ -74,10 +76,10 @@ BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted a
 	\item $BF.Check(x)$: To query if $x$ has been added, it uses the $k$ hashes to map $x$ to a set of bits. If any of them is 0, it returns False; otherwise, it returns True. 
 \end{itemize}
 
-Especially, the $BF.Check()$ gives a False result with no doubt; whereas the True result has the potential to happen when the tested element has not been added, which means a false positive situation.
+Especially, the $BF.Check()$ gives a False result with no doubt; whereas the True result has the potential to happen when the tested element has not been added, which means a false positive situation. 
 
 
-\section{System and Security Model}
+\section{System and Security Model} \label{sec:model}
 As shown in Fig. \ref{architecture}, the proposed scheme works in a communication system with the following 3 kinds of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. The follows describe each of the entities. 
 
 \begin{itemize}
@@ -85,7 +87,7 @@ As shown in Fig. \ref{architecture}, the proposed scheme works in a communicatio
 \end{itemize}
 
 
-\section{Construction}
+\section{Construction}\label{sec:construction}
 \subsection{Revocation-Aware Block Format}
 The block structure in this paper is basically similar to that of Bitcoin, except for the consideration of lightweight node awareness. Firstly, the storage cost of block header should be as short as possible with efficient query and sacrificing no security feature; Secondly, the block header alone can prompt every certificate revocation clearly. 
 
@@ -115,9 +117,14 @@ All registered certificates (regarded as transactions) are structured in merkle 
 
 \subsection{System Procedures}
 \subsubsection{Initialization}
-xxx
+The rCA initiates the system by generating a bilinear tuple $PP=\{p, \mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T, g_1, g_2, e\}$ and a hash function $H:\{0, 1\}^* \rightarrow \mathbb{Z}_p$. It selects its master secret key $\gamma\in \mathbb{Z}_p$, accumulator value $\Delta\in_R \mathbb{G}_1$, and parameters of Bloom filter $(m, k)$ as Section \ref{section:bf}, based on the expected system scale as Section \ref{section:parameter}. It further generates an empty revocation list $\mathbb{R}_x$. The system parameters are published as 
+$$ \bigl\{ PP, \Delta, Y = g_2^\gamma, (m, k) \bigr\}$$
 
-\subsubsection{Certificate Register}
+Blockchain full nodes are gathered by generating a genesis block $B_0$, whose header's format follows Table \ref{table:format}, with all-zeros fields, except the consensus. 
+
+The iCAs are registered in the blockchain as Section \ref{section:register}. As a distributed system, iCA's certificates should be registered in self-sovereign manner, while our AcBF also supports rCA's issuing, by using key pair $(\gamma, Y)$ with BLS signature \cite{bls}. Note that, iCA's certificate status is queried like other entities', hence the later content will not specifically describe the iCA's status check in authentication phase. 
+
+\subsubsection{Certificate Register}\label{section:register}
 xxx
 
 
@@ -133,11 +140,11 @@ xxx
 		%\State $\Delta_T \gets \Delta$
 		\State $BF_{tmp} \gets 0^m$ \Comment{Empty bloom filter}
 		\ForAll{$x \in \mathbb{R}$}
-		\If{$BF.Check(x)$} %\Comment{revoke it from $\Delta$}
+		\If{$BF.Check(x)$} \Comment{as Section \ref{section:bf}}
 		\State $\Delta \gets Del(\Delta, x)$ 
 		\State append $(x, \Delta)$ to L
 		\Else
-		\State $BF_{tmp}.Add(x)$
+		\State $BF_{tmp}.Add(x)$ \Comment{as Section \ref{section:bf}}
 		\EndIf
 		\EndFor
 		\State $BF \gets BF \lor BF_{tmp}$
@@ -145,6 +152,10 @@ xxx
 		\State $rx \gets (L, \mathbb{R})$
 	\end{algorithmic}
 \end{algorithm}
+
+
+\subsubsection{Authentication}
+
 
 \subsubsection{Block Generate and Broadcast}
 The consensus nodes collect certificate register and revocation transactions 
@@ -173,7 +184,10 @@ m = & \frac{\ln \frac{n}{\theta} \cdot \delta}{(\ln 2)^2} \simeq 2.08\delta \cdo
 k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{n}{\theta} \rceil
 \end{align}
 
-\section{Security Analysis of AcBF}
+%\subsection{Compatibility on Other Blockchains}
+%We recommend to implement AcBF with designed block header structure as Table \ref{table:format}, but it is also compatible with traditional blockchain implementations. The main challenge is that Flags
+
+\section{Security Analysis of AcBF}\label{sec:security}
 \begin{theorem}\label{theo:security}
 	The AcBF identity management achieves sound and revocation-detectable user authentication for the lightweight-node verifier.
 \end{theorem}
@@ -200,12 +214,13 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 When a certificate is successfully revoked in a block (e.g., of height $i$), the Flag field of its header should be \textit{True}. As long as the consensus protocol has a strong safety property, the lightweight node will not accept the $i$-th block header with Flag field \textit{False}. 
 \end{IEEEproof}
 
-\section{Performance Evaluation}
+\section{Performance Evaluation} \label{sec:efficiency}
 
 Compared with entire bloom filter with distinct parameters.
 
-\section{Related Works}
+\section{Related Works}\label{section:related}
 
+\section{Conclusion}\label{sec:conclusion}
 
 \bibliographystyle{IEEEtran}
 \bibliography{id}
