@@ -85,16 +85,16 @@ Especially, the $BF.Check()$ gives a False result with no doubt; whereas the Tru
 Merkle hash tree \cite{daiSBLWTSecureBlockchain2018} is essentially a binary tree where the leaf node is labeled a hash of a data block, and the non-leaf node is labeled with the hash of its child nodes. Such structure allows efficient verification of any large data. As shown in Fig. \ref{fig:mht}, $cert_A$ is labelled with the 2nd leaf of MHT, whose path is ``01'' (0 for left child and 1 for the right).
 
 Simplified payment Verification (SPV) is a method to check if one data block is in a MHT, when the verifier only knows the root node. To realize the verification, SPV requires the prover side to offer necessary auxiliary information to the verifier, which means the values of \textbf{all sibling nodes from the hash of proved data block to the root}.
-Return to Fig. \ref{fig:mht}, the auxiliary information of $cert_A$ is as: $AUX_A = (h_{00}, h_{1})$. Since each one obtaining the auxiliary as well as  $R$ can check if:
+Return to Fig. \ref{fig:mht}, the auxiliary information of $cert_A$ is as: $AUX_A = (h_{00}, h_{1})$. Since each one obtaining tuple $(R, cert_A, AUX_A)$ can check if:
 \begin{align}\label{eq:aux}
-	R \overset{?}{=} h(h(h_{00}, h(cert_A)), h_1)
+R \overset{?}{=} h(h(h_{00}, h(cert_A)), h_1)
 \end{align}
 %where $h()$ is any selected secure hash function.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=9cm]{mht}
-	\caption{Architecture}\label{fig:mht}
+	\includegraphics[width=8.5cm]{mht}
+	\caption{Instance of merkle hash tree (MHT) with necessary definitions}\label{fig:mht}
 \end{figure}
 
 \section{System and Security Model} \label{sec:model}
@@ -107,6 +107,7 @@ As shown in Fig. \ref{architecture}, the proposed scheme works in a communicatio
 
 \section{Construction}\label{sec:construction}
 \subsection{Revocation-Aware Block Format}
+\label{sec:format}
 The block structure in this paper is basically similar to that of Bitcoin, except for the consideration of lightweight node awareness. Firstly, the storage cost of block header should be as short as possible with efficient query and sacrificing no security feature; Secondly, the block header alone can prompt every certificate revocation clearly. 
 
 Taking into account the two issues, we redesign the 1) fields of block header, and 2) the tree structure of transactions. The header is a fixed length data, such that an unstructured storage can support fast addressing based on block height. The necessary fields are depicted in Table \ref{table:format}. Especially, as our later implementation uses 224-bit hash function and curves, the presented sizes of Previous hash and MHT (hash of merkle hash tree) are 28 bytes. The Flag field is a main difference for the second consideration: it is a boolean variable to notify whether revocation events occur in this round.
@@ -148,9 +149,9 @@ The iCAs are registered in the blockchain as Section \ref{section:register}. As 
 Every lightweight node initiates its ledger by updating the block headers from selected full nodes, like other lightweight node-supported schemes. In addition, it updates the bloom filter $BF$ and accumulator value $\Delta$. As the full nodes are not trusted, the $BF$ and $\Delta$ are checked from the blocks with revocation transactions as depicted in Section \ref{sec:revoke}.
 
 \subsubsection{Certificate Register}\label{section:register}
-From an arbitrary trusted iCA, each entity $U_i$ applies this phase to register an on-chain certificate $cert_i$. The certificate in AcBF is basically similar to that in X.509, except that AcBF does not need the globally unique sequence number. Instead, AcBF uses its unique location $i_{Loc} = (i_h, i_p)$ in blockchain to identify the certificate, where $i_h$ is denoted as the height of registered block, and $i_p$ is its path in MHT. Fig. \ref{fig:mht} gave an instance of a certificate's unique location.
+From an arbitrary trusted iCA, each entity $U_i$ applies this phase to register an on-chain certificate $cert_i$. The certificate in AcBF is basically similar to that in X.509, except that AcBF does not need the globally unique sequence number. Instead, AcBF uses its unique location $i_{Loc} = (i_h, i_p)$ in blockchain to identify the certificate, where $i_h$ is denoted as the height of registered block, and $i_p$ is its path in MHT. Fig. \ref{fig:mht} gives an instance of a certificate's unique location.
 
-We should mention that $U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions). After the consensus and broadcast of the block as Section \ref{sec:consensus}, this phase is completed with $U_i$ gets its $i_{Loc}$ and the auxiliary information of MHT $AUX_i$.
+We should mention that $U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions). After the consensus and broadcast of the block as Section \ref{section:block_consensus}, this phase is completed with $U_i$ gets its $i_{Loc}$ and the auxiliary information of MHT $AUX_i$.
 
 
 \subsubsection{Revocation} \label{sec:revoke}
@@ -188,7 +189,7 @@ Especially, AcBF proposes an efficient accumulator method based on \cite{accumul
 	\item \textit{Del} removes the member $x_i$ by updating the value $\Delta$;
 	\item \textit{Update} helps the other members $x_i$ to update their witnesses with the input parameters.
 \end{itemize}
-After Algorithm \ref{alg:revokeCA}, rCA uploads the revocation transaction $rx$ to the blockchain nodes with its signature.
+After Algorithm \ref{alg:revokeCA}, rCA uploads the revocation transaction $rx$ to the blockchain nodes with its signature $R_x$.
 
 \begin{algorithm}[t]
 	\renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -212,7 +213,7 @@ After Algorithm \ref{alg:revokeCA}, rCA uploads the revocation transaction $rx$ 
 	\end{algorithmic}
 \end{algorithm}
 
-2) When a lightweight node $U_i$ invokes the revocation by the notification of Flag field as Section \ref{sec:consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and execute Algorithm \ref{alg:revokeNode}.
+2) When a lightweight node $U_i$ invokes the revocation by the notification of Flag field as Section \ref{section:block_consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and executes Algorithm \ref{alg:revokeNode}.
 
 Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses on the case a legal user will be innocently checked as revoked one if only with bloom filter. Whereas, AcBF uses the accumulator $\Delta$ to fix this problem. The rCA will be responsible for this request since it has the entire revocation list $\mathbb{R}_x$.
 
@@ -240,18 +241,51 @@ Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses o
 	\end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Authentication}
+\subsubsection{Authentication}\label{section:authentication}
+When $U_i$ needs to authenticate itself to a lightwight verifier $V$, it should sign a certain message or achanllege with its $sk_i$. This paper focuses on the issue that how $U_i$ convinces $V$ that the relevant $pk_i$ is associated with a valid on-chain certificate.
+
+The certificate validation message includes the certificate $cert_i$, its registered location $i_{Loc}$ (including $i_h$ and $i_p$), the auxiliary information of MHT $AUX_i$. If $U_i$ has got $W_i$, the witness of accumulator, then $W_i$ should also be in the message. The entire message is as 
+$$\sigma = \biggl(Sig(m; sk), cert_i, i_{Loc}, AUX_i, \mbox{\textit{optional }} W_i\biggr)$$
+
+Upon the recept of $\sigma$, $V$ checks the follows:
+\begin{itemize}
+	\item \textit{Existence}: the tuple $(R, cert_i, AUX_i)$ as \eqref{eq:aux}, where $R$ is the MHT field of the $i_h$-th block.
+	\item \textit{Non-revocation}: If $\sigma$ does not contain $W_i$, checks $$BF.Check(i_{Loc})\overset{?}{=} 0;$$ Else, checks 
+	\begin{align} 
+		e(W_i, g^{i_{Loc}}\cdot Y) \overset{?}{=} e(\Delta, g_2)
+	\end{align}
+	\item The signature is validated with public key in $cert_i$.
+\end{itemize}
+If the above is all passed, $V$ is convinced that $U_i$ is valid. Otherwise, the authentiation is failure. 
 
 
-\subsubsection{Block Generate and Broadcast}\label{sec:consensus}
-The consensus nodes collect certificate register and revocation transactions 
+\subsubsection{Block Generate and Broadcast}\label{section:block_consensus}
+
+The blockchain full nodes collect certificate register transactions from muliptle iCAs, and at most one revocation one $rx$ (with signgature $R_x$). According to the selected consensus mechanism, the nodes organize the transactions to MHT, according to Section \ref{sec:format}, as well as the block header encapsulation: the Flag field is set to ``1'' or ``0'', depending on whether this block contains an $rx$. Let the height of thisn newly generated block be $h_n$.
+
+After this block is generated, other full nodes checks its validity including the follows:
+\begin{itemize}
+	\item \textit{Transactions:} All transactions are valid, especially, $R_x$ is the correct signature of $r_x$ with $Y$.
+	\item \textit{Structure:} $h_n = h_c + 1$, where $h_c$ is the largest height of stored block; $rx$ exists if Flag is ``1''; and all hashes are valid, including the previous hash.
+\end{itemize}
+
+After consensus, the block header, as well as $r_x$ and $R_c$ (the MHT root of only certificate registeration transaction) are transmitted to every lightweight node. 
+Upon the recept of the header, each lightweight node checks as: 
+\begin{enumerate}
+	\item If Flag is ``1'' without $rx$, the lightweight node should request $rx$ as well as $R_c$. Otherwise, finishes the check.
+	\item  Check $R_x$ is the signature of $r_x$ and $H(R_a, R_x) \overset{?}{=} R_c$, which is the value of MHT field of this block. 
+\end{enumerate}
+
+Whether full or lightweight nodes, if the Flag is ``1'', then invokes Algorithm \ref{alg:revokeNode} with the verified $rx$, to update local BF, accumulator value $\Delta$ and opitionally its witness.
+After that, the lightweight node removes $r_x$, $R_x$ and $R_a$.
+
 \subsection{Parameter Determine for Bloom Filter} \label{section:parameter}
 
 The length of Bloom Filter in this paper can be dramatically decreased compared with other schemes for certificate revocation. This section gives a theoretical derivation for the relevant parameter.
 
 Let $n, \delta$ be the possible maximal number of registered and revoked users, respectively. The remaining factor is system effect of user revocation: when revocation is executed in one consensus round, the expected affected users should be limited to $\theta$, which can be measured as the member amount of Accumulator $\Delta$. The measurement is feasible as:
 \begin{itemize}
-    \item Larger member amount in $\Delta$ causes larger probability that a user to be revoked has already in $\Delta$ and more other members to update their auxiliary information as \eqref{xxx}.
+    \item Larger member amount in $\Delta$ causes larger probability that a user to be revoked has already in $\Delta$ and more other members to update their witness.
     \item The probability that innocent users applies for accumulator member affects the increase rate of $\theta$. Thus, $\theta$ also implies the effect when revocation is executed just in bloom filter.
 \end{itemize}
 
@@ -281,8 +315,8 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 \begin{IEEEproof}
     A user without a registered certificate in public ledger (even without a revoked identity) will not forge an authentication due to the traditional certificate technique with trust SPV method. Thus, this proof mainly focuses on the revoked user. Formally, this theorem holds if a revoked user $\mathcal{A}$ wins the following challenges with negligible advantage.
     \begin{enumerate}
-        \item With the knowledge of accumulator value $\Delta$, as well as any pair of other user's accumulator pair from authentication message \ref{section:authentication}, $\mathcal{A}$ tries to forge its auxiliary value.
-        \item When $\mathcal{A}$ goes through a revocation based on member delete in $\Delta$, it tries to forge a new auxiliary value for the updated $\Delta$.
+        \item With the knowledge of accumulator value $\Delta$, as well as any other user's accumulator pair from authentication message $(i_{Loc}, W_i)$, $\mathcal{A}$ tries to forge its witness.
+        \item When $\mathcal{A}$ goes through a revocation based on member delete in $\Delta$, it tries to forge a new witness value for the updated $\Delta$.
         \item When $\mathcal{A}$ is revoked in block $j$, it tries to hide the revocation fact during the broadcast of block header.
     \end{enumerate}
 
@@ -305,7 +339,14 @@ When a certificate is successfully revoked in a block (e.g., of height $i$), the
 Compared with entire bloom filter with distinct parameters.
 
 \section{Related Works}\label{section:related}
+Blockchain is a promising technology to devise reliable and decentralized certificate management. Fromknecht \textit{et al}. 
+\cite{fromknechtDecentralizedPublicKey} proposed CertCoin, which ensures identity retention with the help of cryptocurrencies. 
+Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018} proposed a dependability-rank based consensus, thus realized certificate forward traceability. Liu \textit{et al}. \cite{liuBlockchainEmpoweredCooperative2020}  proposed a decentralized and traceable collaborative authentication mechanism  by introducing the mechanism of secret sharing and dynamic proxy technology to blockchain. Zhuo \textit{et al}. realized efficient and decentralized key management for VANETs, with additional mechanism of public key registration, update and revocation in \cite{maEfficientDecentralizedKey2020} proposed an efficient decentralized key management mechanism for VANETs with blockchain. Xu \textit{et al}. \cite{xuIdentityManagementAuthentication2020} leveraged the redactable blockchain to revoke illegal users without the CRL (certificate revocation list) method. Can \textit{et al}. \cite{zhangBPAFBlockchainEnabledReliable2022} presented BPAF, a blockchain-based authentication for vehicular fog devices, which achieves reliable and privacy-preserving authentication.
 
+The idea of redactable blockchain solves the problem in blockchain that the illegal or invalid information (e.g., malicious user's identity registration) may be uploaded to the immutable ledger.
+The existing redactable blockchain solutions can be classified into two categories: voting mechanisms and chameleon hash functions. In \cite{deuberRedactableBlockchainPermissionless2019}, Deuber \textit{et al}. proposed a voting mechanism, where the redaction proposal reaches a consensus after generating threshold blocks for voting. 
+Nevertheless, it takes a long time to vote for the proposal and to check whether a redaction reaches a consensus by traversing the blocks. In  \cite{ jiaPROCESSPrivacyPreservingOnChain2021}, Jia \textit{et al}. proposed PROCESS, an online privacy-preserving on-chain certificate status query service, by 
+using chameleon hash to record the changes of Counting Garbled Bloom Filter (CGBF) on the blockchain. Luo \textit{et al}. \cite{luoScalaCertScalabilityOrientedPKI2022a} utilized the redactable blockchain to record revocation information directly on the original certificate and removed additional data structures such as CRL.
 \section{Conclusion}\label{sec:conclusion}
 
 \bibliographystyle{IEEEtran}
