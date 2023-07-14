@@ -109,7 +109,7 @@ As shown in Fig. \ref{architecture}, the proposed scheme works in a communicatio
 \subsection{Revocation-Aware Block Format}
 The block structure in this paper is basically similar to that of Bitcoin, except for the consideration of lightweight node awareness. Firstly, the storage cost of block header should be as short as possible with efficient query and sacrificing no security feature; Secondly, the block header alone can prompt every certificate revocation clearly. 
 
-Taking into account the two issues, we redesign the 1) fields of block header, and 2) the tree structure of transactions. The header is a fixed length data, such that an unstructured storage can support fast addressing based on block height. The necessary fields are depicted in Table \ref{table:format}. Especially, as our later implementation uses 224-bit hash function and curves, the presented sizes of Previous hash and MHT (hash of merkle hash tree) are 28 bytes. The Flag filed is a main difference for the second consideration: it is a boolean variable to notify whether revocation events occur in this round.
+Taking into account the two issues, we redesign the 1) fields of block header, and 2) the tree structure of transactions. The header is a fixed length data, such that an unstructured storage can support fast addressing based on block height. The necessary fields are depicted in Table \ref{table:format}. Especially, as our later implementation uses 224-bit hash function and curves, the presented sizes of Previous hash and MHT (hash of merkle hash tree) are 28 bytes. The Flag field is a main difference for the second consideration: it is a boolean variable to notify whether revocation events occur in this round.
 
 The consensus filed depends on the used consensus method, e.g., it is a nonce for puzzle-like consensus method like PoW, or a digital signature for permission-based consensus.
 
@@ -130,7 +130,7 @@ The consensus filed depends on the used consensus method, e.g., it is a nonce fo
 	\end{tabular}
 \end{table}
 
-All registered certificates (regarded as transactions) are structured in merkle hash tree as Section \ref{section:mht}, whose hash of root node is represented as $R_c$. There is also a slight difference for revocation awareness: if there is no revocation, $R_c$ is just the value of MHT; otherwise, MHT is assigned the hash of $R_a$ and the signature of revocation transaction in this block (denoted as $R_x$). For certificates registered in this block, their SPV data includes $R_x$ in such case.
+All registered certificates (regarded as transactions) are structured in merkle hash tree as Section \ref{section:merkle}, whose hash of root node is represented as $R_c$. There is also a slight difference for revocation awareness: if there is no revocation, $R_c$ is just the value of MHT; otherwise, MHT is assigned the hash of $R_a$ and the signature of revocation transaction in this block (denoted as $R_x$). For certificates registered in this block, their SPV data includes $R_x$ in such case.
 
 
 \subsection{System Procedures}
@@ -144,16 +144,24 @@ Blockchain full nodes are gathered by generating a genesis block $B_0$, whose he
 
 The iCAs are registered in the blockchain as Section \ref{section:register}. As a distributed system, iCA's certificates should be registered in self-sovereign manner, while our AcBF also supports rCA's issuing, by using key pair $(\gamma, Y)$ with BLS signature \cite{boneh2004short}. Note that, iCA's certificate status is queried like other entities', hence the later content will not specifically describe the iCA's status check in authentication phase. 
 
+
+Every lightweight node initiates its ledger by updating the block headers from selected full nodes, like other lightweight node-supported schemes. In addition, it updates the bloom filter $BF$ and accumulator value $\Delta$. As the full nodes are not trusted, the $BF$ and $\Delta$ are checked from the blocks with revocation transactions as depicted in Section \ref{sec:revoke}.
+
 \subsubsection{Certificate Register}\label{section:register}
-From an arbitrary trusted iCA, each entity $U_i$ applies this phase to register an on-chain certificate $cert_i$. The certificate in AcBF is basically similar to that in X.509, except that AcBF does not need the globally unique sequence number. Instead, AcBF uses its unique locate $i_{Loc} = (i_h, i_p)$ in blockchain to identify the certificate, where $i_h$ is denoted as the height of registered block, and $i_p$ is its path in MHT. 
+From an arbitrary trusted iCA, each entity $U_i$ applies this phase to register an on-chain certificate $cert_i$. The certificate in AcBF is basically similar to that in X.509, except that AcBF does not need the globally unique sequence number. Instead, AcBF uses its unique location $i_{Loc} = (i_h, i_p)$ in blockchain to identify the certificate, where $i_h$ is denoted as the height of registered block, and $i_p$ is its path in MHT. Fig. \ref{fig:mht} gave an instance of a certificate's unique location.
 
-We should mention that $U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions) 
+We should mention that $U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions). After the consensus and broadcast of the block as Section \ref{sec:consensus}, this phase is completed with $U_i$ gets its $i_{Loc}$ and the auxiliary information of MHT $AUX_i$.
 
-\subsubsection{Revocation}
 
-\begin{algorithm}
+\subsubsection{Revocation} \label{sec:revoke}
+This phase consists of 1) execution by rCA, and 2) reaction by other entities, especially the lightweight nodes. 
+
+1) To execute revocation, rCA prepares a temporary revocation list $\mathbb{R}$ gathers revocation request from legal iCAs and certificate owners. After validation of each request (which is beyond the scope of this paper), rCA appends the location $i_{Loc}$ of the certificate to $\mathbb{R}$ until it invokes Algorithm \ref{alg:revokeCA} to generate revocation transaction. 
+
+
+\begin{algorithm}[t]
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
-	\caption{Revocation Procedure of rCA}\label{alg:cap}
+	\caption{Revocation Procedure of rCA}\label{alg:revokeCA}
 	\begin{algorithmic}[1]
 		\Require $\mathbb{R}$, $\mathbb{R}_x$, $BF$ and $\Delta$ %\Comment{Set of user indexes to be revoked}
 		\Ensure Revocation Transaction ($rx$)
@@ -161,25 +169,81 @@ We should mention that $U_i$ securely stores a secret key $sk_i$, whose relevant
 		%\State $\Delta_T \gets \Delta$
 		\State $BF_{tmp} \gets 0^m$ \Comment{Empty bloom filter}
 		\ForAll{$x \in \mathbb{R}$}
-		\If{$BF.Check(x)$} \Comment{as Section \ref{section:bf}}
-		\State $\Delta \gets Del(\Delta, x)$ 
+		\If{$BF.Check(x)$} %\Comment{as Section \ref{section:bf}}
+		\State $\Delta \gets Del(\Delta, x)$ \Comment{as Algorithm \ref{alg:accumulate}}
 		\State append $(x, \Delta)$ to L
 		\Else
-		\State $BF_{tmp}.Add(x)$ \Comment{as Section \ref{section:bf}}
+		\State $BF_{tmp}.Add(x)$ %\Comment{as Section \ref{section:bf}}
 		\EndIf
 		\EndFor
-		\State $BF \gets BF \lor BF_{tmp}$
-		\State $\mathbb{R}_x \gets \mathbb{R}_x \bigcup \mathbb{R} $
-		\State $rx \gets (L, \mathbb{R})$
+		\State $BF \gets BF \lor BF_{tmp}$, $\mathbb{R}_x \gets \mathbb{R}_x \bigcup \mathbb{R} $
+		
+		\Return $rx \gets (L, \mathbb{R})$
 	\end{algorithmic}
 \end{algorithm}
 
+Especially, AcBF proposes an efficient accumulator method based on \cite{accumulator}, including the following three functions:
+\begin{itemize}
+	\item \textit{Add} makes the input value $x_i$ as the member of accumulator, by outputting $W_i$ as its witness;
+	\item \textit{Del} removes the member $x_i$ by updating the value $\Delta$;
+	\item \textit{Update} helps the other members $x_i$ to update their witnesses with the input parameters.
+\end{itemize}
+After Algorithm \ref{alg:revokeCA}, rCA uploads the revocation transaction $rx$ to the blockchain nodes with its signature.
 
+\begin{algorithm}[t]
+	\renewcommand{\algorithmicensure}{\textbf{Output:}}
+	\caption{Accumulator}\label{alg:accumulate}
+	\begin{algorithmic}[1]
+		\Require $\gamma, \Delta, Y= g_2^\gamma$ %\Comment{Set of user indexes to be revoked}
+		%\Ensure Revocation Transaction ($rx$)
+		\Function{Add}{$\Delta, x_i$}
+		
+		\Return $W_i \gets \Delta ^{1/(x_i + \gamma)}$
+		\EndFunction
+		
+		\Function{Del}{$\Delta, x_j$}
+		
+		\Return $\Delta \gets \Delta ^{1/(x_j + \gamma)}$
+		\EndFunction
+		\Function{Update}{($x_i, W_i), \Delta, x_j$} \Comment{$x_j$ is revoked}\label{fuction:update}
+		
+		\Return $W_i \gets (W_i/\Delta)^{1/(x_j - x_i)}$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+2) When a lightweight node $U_i$ invokes the revocation by the notification of Flag field as Section \ref{sec:consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and execute Algorithm \ref{alg:revokeNode}.
+
+Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses on the case a legal user will be innocently checked as revoked one if only with bloom filter. Whereas, AcBF uses the accumulator $\Delta$ to fix this problem. The rCA will be responsible for this request since it has the entire revocation list $\mathbb{R}_x$.
+
+\begin{algorithm}[t]
+	\renewcommand{\algorithmicensure}{\textbf{Output:}}
+	\caption{Revocation Reaction by Lightweight Node $U_i$}\label{alg:revokeNode}
+	\begin{algorithmic}[1]
+		\Require $BF, i_{Loc}, L, \mathbb{R}, W_i$. \Comment{$W_i$ is input only if $i_{Loc}\in\Delta$}
+		\Ensure $\Delta$
+		\If{$L\neq\emptyset$}
+		\State Update $\Delta$ as the last tuple of $L$
+		\EndIf
+		\ForAll{$x \in \mathbb{R}$}
+		\State $BF.Add(x)$ 
+		\EndFor
+		\If{$W_i$ is input} 
+		\ForAll{$(x_j, \Delta) \in L$}
+		\State $W_i\gets Update((i_{Loc}, W_i), \Delta)$ \Comment{Line \ref{fuction:update} of Alg. \ref{alg:accumulate}}
+		\EndFor
+		\ElsIf{$BF.Check(i_{Loc})$}
+		\State Invoke $Add(\Delta, i_{Loc})$ with rCA to get $W_i$ \label{line:apply_accumulator}
+		
+		\Return $W_i$ as $U_i$'s witness
+		\EndIf
+	\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Authentication}
 
 
-\subsubsection{Block Generate and Broadcast}
+\subsubsection{Block Generate and Broadcast}\label{sec:consensus}
 The consensus nodes collect certificate register and revocation transactions 
 \subsection{Parameter Determine for Bloom Filter} \label{section:parameter}
 
@@ -200,7 +264,7 @@ The parameter $k$ can be individually optimized to minimize $\Pr(1)$ as $ k = \f
 \begin{align}\label{eq:bloomfilter}
     \theta = n \cdot (1 - e^{-k\delta/m})^{k} = 0.5^{\frac{m}{\delta}\ln 2}\cdot n
 \end{align}
-From \eqref{eq:bloomfilter}, the parameters of Bloom filter can be determined as 
+From \eqref{eq:bloomfilter}, the parameters of Bloom filter are determined as 
 \begin{align}
 m = & \frac{\ln \frac{n}{\theta} \cdot \delta}{(\ln 2)^2} \simeq 2.08\delta \cdot\ln \frac{n}{\theta}\\
 k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{n}{\theta} \rceil
