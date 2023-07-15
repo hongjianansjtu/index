@@ -1,6 +1,7 @@
 \documentclass[conference]{IEEEtran}
 \usepackage{graphicx}
 \graphicspath{{fig/}}
+\usepackage{balance}
 \usepackage{amsmath, amssymb}
 \usepackage{algorithm, algpseudocode}
 \newtheorem{theorem}{Theorem}
@@ -25,7 +26,7 @@
 \end{IEEEkeywords}
 
 \section{Introduction}
-Blockchain is an attractive technology for distributed identity management \cite{9075663} due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure), the character of blockchain-based method suits better in current and future network systems, due to its ability to faithfully organize the trust for large amount of entities \cite{certchain2018,yang2018blockchain}, particularly the trust relationship between CAs (certificate authorities). 
+Blockchain is an attractive technology for distributed identity management \cite{9075663} due to its security features, such as append-only and non-tempering storage, decentralized consensus, and reliable trust establishment. Compared with traditional identity system, such as PKI (public key infrastructure) \cite{pki}, the character of blockchain-based method suits better in current and future network systems, due to its ability to faithfully organize the trust for large amount of entities \cite{chenCertchainPublicEfficient2018a,yang2018blockchain}, particularly the trust relationship between CAs (certificate authorities). 
 Therefore, the idea of blockchain-based identity can develop security for various network scenarios, including Internet of Thing (IoT) \cite{zhangBPAFBlockchainEnabledReliable2022a}, Internet of Vehicles (IoV)  \cite{8010820,singh2018branch}, etc., where decentralized trust is critically required. 
 
 Despite the decentralized trust organization introduced by blockchain, it also brings in many practical problems due to its certificate status query method. For blockchain-based identity, a certificate's status (e.g., registered, illegal, or revoked) should be queried from the ledger of blockchain, which is maintained by multiple blockchain nodes. That is the cause of problems or security threats for communication resource-constrained scenarios. Firstly, the transaction query requires several round trip time (RTT) between IoT devices (or vehicle) and at least one blockchain node, which costs unbearable delay for latency-strict cases, e.g., safety notification message of IoV; what is worse, the highly dynamic topology of these network system makes the routing of query response complex. Secondly, it is dangerous to  query certificate's status from only one node, which leads to the security bottleneck problem; and it makes the first problem even worse to refer to more blockchain nodes. A worse threat is that some network attack will isolate the device from legal blockchain nodes at the very time when the device needs to check a certificate. 
@@ -189,6 +190,8 @@ Especially, AcBF proposes an efficient accumulator method based on \cite{accumul
 	\item \textit{Del} removes the member $x_i$ by updating the value $\Delta$;
 	\item \textit{Update} helps the other members $x_i$ to update their witnesses with the input parameters.
 \end{itemize}
+The detailed execution of these functions are illustrated in Algorithm \ref{alg:accumulate}.
+
 After Algorithm \ref{alg:revokeCA}, rCA uploads the revocation transaction $rx$ to the blockchain nodes with its signature $R_x$.
 
 \begin{algorithm}[t]
@@ -340,15 +343,22 @@ Compared with entire bloom filter with distinct parameters.
 
 \section{Related Works}\label{section:related}
 Blockchain is a promising technology to devise reliable and decentralized certificate management. Fromknecht \textit{et al}. 
-\cite{fromknechtDecentralizedPublicKey} proposed CertCoin, which ensures identity retention with the help of cryptocurrencies. 
-Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018} proposed a dependability-rank based consensus, thus realized certificate forward traceability. Liu \textit{et al}. \cite{liuBlockchainEmpoweredCooperative2020}  proposed a decentralized and traceable collaborative authentication mechanism  by introducing the mechanism of secret sharing and dynamic proxy technology to blockchain. Zhuo \textit{et al}. realized efficient and decentralized key management for VANETs, with additional mechanism of public key registration, update and revocation in \cite{maEfficientDecentralizedKey2020} proposed an efficient decentralized key management mechanism for VANETs with blockchain. Xu \textit{et al}. \cite{xuIdentityManagementAuthentication2020} leveraged the redactable blockchain to revoke illegal users without the CRL (certificate revocation list) method. Can \textit{et al}. \cite{zhangBPAFBlockchainEnabledReliable2022} presented BPAF, a blockchain-based authentication for vehicular fog devices, which achieves reliable and privacy-preserving authentication.
+\cite{fromknechtDecentralizedPublicKey} proposed CertCoin, which ensures identity retention with the help of cryptocurrencies.  
+Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018a} proposed a dependability-rank based consensus, thus realized certificate forward traceability. 
+Compared with the traditional technique like CA-based PKI \cite{pki} and PGP method \cite{pgp}, the tamper free feature brought from blockchain tackles the gap between decentralized deployment and secure certificate management, respectively. 
+A totally decentralized identity model called SSI (self-sovereign identity) \cite{foundation_sovrin_2018} was designed by the Sovrin Foundation in 2018. In SSI, users' identities are registered in blockchain by themselves, while authorities are responsible for determining the privilege of each ID with off-chain credentials. This idea has been realized in industrial implementations such as hyperledger indy \cite{indy}, and attracted academic researches, like SmartDID \cite{smartdid}. However, the fully decentralized method does not suit practical identity management, since it is difficult to deal with the trust and revocation.
+
+
+Liu \textit{et al}. \cite{liuBlockchainEmpoweredCooperative2020}  proposed a decentralized and traceable collaborative authentication mechanism  by introducing the mechanism of secret sharing and dynamic proxy technology to blockchain. 
+Zhuo \textit{et al}. realized efficient and decentralized key management for VANETs, with additional mechanism of public key registration, update and revocation in \cite{maEfficientDecentralizedKey2020} proposed an efficient decentralized key management mechanism for VANETs with blockchain. 
+Xu \textit{et al}. \cite{xuIdentityManagementAuthentication2020} leveraged the redactable blockchain to revoke illegal users without the CRL (certificate revocation list) method. Can \textit{et al}. \cite{zhangBPAFBlockchainEnabledReliable2022} presented BPAF, a blockchain-based authentication for vehicular fog devices, which achieves reliable and privacy-preserving authentication.
 
 The idea of redactable blockchain solves the problem in blockchain that the illegal or invalid information (e.g., malicious user's identity registration) may be uploaded to the immutable ledger.
 The existing redactable blockchain solutions can be classified into two categories: voting mechanisms and chameleon hash functions. In \cite{deuberRedactableBlockchainPermissionless2019}, Deuber \textit{et al}. proposed a voting mechanism, where the redaction proposal reaches a consensus after generating threshold blocks for voting. 
 Nevertheless, it takes a long time to vote for the proposal and to check whether a redaction reaches a consensus by traversing the blocks. In  \cite{ jiaPROCESSPrivacyPreservingOnChain2021}, Jia \textit{et al}. proposed PROCESS, an online privacy-preserving on-chain certificate status query service, by 
 using chameleon hash to record the changes of Counting Garbled Bloom Filter (CGBF) on the blockchain. Luo \textit{et al}. \cite{luoScalaCertScalabilityOrientedPKI2022a} utilized the redactable blockchain to record revocation information directly on the original certificate and removed additional data structures such as CRL.
 \section{Conclusion}\label{sec:conclusion}
-
+\balance
 \bibliographystyle{IEEEtran}
 \bibliography{id}
 \end{document}
