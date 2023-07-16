@@ -2,12 +2,13 @@
 \usepackage{graphicx}
 \graphicspath{{fig/}}
 \usepackage{balance}
-\usepackage{amsmath, amssymb}
+\usepackage{amsmath, amssymb, amsbsy, pifont}
 \usepackage{algorithm, algpseudocode}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}[theorem]
 \newtheorem{definition}{Definition}
 \usepackage{hyperref}
+\usepackage{multirow}
 
 \title{AcBF: A Revokable Blockchain-based Identity Management Enabling Low-Latency Authentication}
 \author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, and Yue Wu}
@@ -17,9 +18,9 @@
 \begin{abstract}
 	Blockchain-based identity has brings great evolution due to its decentralized deployment, transparent and tamper-free ledger. Specification groups of B5G/6G are exploring approaches to integrate the technology to future network systems, e.g., Internet of Things, vehicular network, industrial communications. Note that devices in these systems are storage constrained with instable channels, thus requires lightweight node deployment. The security problem comes: revoked identity can forge a legitimate authentication, since the lightweight verifier does not maintain the revocation transactions. 
 	This paper hence proposes AcBF, a novel revokable identity management scheme. Especially, it enables extremely low authentication latency by allowing the lightweight node to query certificate's status locally. To realize this feature trustly, we first design a revocation transaction based on accumulator-assisted bloom filter to minimize the storage of certificate status structure. Secondly, we further construct the blockchain protocol, with which, no revocation event will slip on any lightweight ledger, even in an insecure or instable communication environment.  
-	In addition, different with other no-CRL revocation mechanism, AcBF brings very small effect to valid user to execute the revocation, with quite a small probability.
+	In addition, different from other no-CRL revocation mechanism, AcBF brings much smaller impact on valid user to execute the revocation. %, and with quite a small probability.
 	Security and performance analysis
-	shows that AcBF has sufficient security and advantageous efficiency on both lightweight verifiers and identity owners, thus suits identity management systems with low-latency constraints.
+	shows that AcBF has strong security and advantageous efficiency on both lightweight verifiers and certificate owners, thus suits identity management systems with low-latency constraints.
 \end{abstract}
 \begin{IEEEkeywords}
     Blockchain identity, revocation-aware authentication, lightweight node, low latency
@@ -36,7 +37,7 @@ This paper proposes a blockchain-based identity management scheme by deploying l
 
 The property of lightweight node has attracted many researchers to deploy blockchain in IoT, industrial environments, etc.. However, we should take more issues into account, before utilizing it to manage users' and devices' identities. The core problem is revocation! Let us take the following instance: a user's $U$ identity is registered in block $i$, and is later revoked in block $j$. If $U$ wants to authenticate its identity to a lightweight node, it can easily succeed in this forge: as $U$'s certificate still has a valid SPV method for block $i$, and the lightweight node is not informed of the revocation based on the stored block headers, unless $U$ consciously hands it up. Although some blockchain-based identity management schemes have proposed well designed revocation method \cite{luoScalaCertScalabilityOrientedPKI2022a,  wang2020blockchain,jiaRedactableBlockchainDecentralized2022,chenCertchainPublicEfficient2018a}, they no longer work in our system, as they require the verifier to master the whole blockchain data. 
 
-The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. The proposed work uses a short Bloom Filter to record the revoked certificates; and additionally leverages a pairing-based accumulator to achieve a precise certificate validity check, even with quite small storage. Different from related work, in order to tolerate the case when the forger controls the downlink channel (to obtain block header), we construst our new blockchain scheme (AcBF). In AcBF, with our designed revocation transaction and small-volume header structure, the lightweight verifier can be aware of the revocation events even with the received header, thus achieves local query to improve the efficiency and reliability. 
+The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. The proposed work uses a short Bloom Filter to record the revoked certificates; and additionally leverages a pairing-based accumulator to achieve a precise certificate validity check, even with quite small storage. Different from related work, in order to tolerate the case when the forger controls the communication channel, we construst a new certificate management scheme (AcBF). In AcBF, with our designed revocation transaction and small-volume header structure, the lightweight verifier can be aware of the revocation events with only the received header, thus achieves trust local query to improve the efficiency and reliability. 
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
@@ -107,12 +108,41 @@ As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication s
 	\includegraphics[width=7.5cm]{model}
 	\caption{Blockchain-based Identity System Architecture}\label{fig:model}
 \end{figure}
+\subsection{Entity Description}
+\subsubsection{Certificate Authorities}
+ The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. AcBF sepereates multiple CAs into two categories: one revocation CA (rCA) for certificate revocation, and muliptle issuer CAs (iCA) for issuing affairs. 
+ 
+ The rCA should be responsible for parameter determination (as \textcircled{1} in Fig. \ref{fig:model}), and revoke on-chain certificates by \textcircled{4}submitting revocation transactions. Different from PKI, the iCAs are not fully trusted, they issue on-chain certificates to other entities by \textcircled{3}submitting registration transactions. 
+
+It should be mentioned that, it is easy to fully decentralize AcBF by realizing a threshold revocation among muliple rCAs. There are exiting cryptographic solutions such as \cite{Gennaro2019FullyDG} to be leveraged. 
+For the clarity of introduction, this paper just uses a one-rCA model. 
+
+\subsubsection{Full Nodes}
+They are blockchain nodes storing all blocks including transactions, and taking part in every-round consensus. Our scheme does not depend on a specific consensus method. The full nodes provide service to other entities: they gather transactions from CAs to generate blocks, \textcircled{5} broadcast latest block header to lightweight nodes, and \textcircled{2} help lightweight node to initiate local ledger,  when the lightweight nodes newly enters the system just then. 
+
+\subsubsection{Lightweight Nodes}
+They are resource constrained devices from the perspective of storage and bandwidth. Thus they only stores block header for transaction validation based on SPV method. 
+To achieve the SPV, the lightweight node should keep up with the blockchain status by receiving newly generated blocks, as well as the revcation events from at least one reachable full nodes. 
+
+The lightweight nodes will communicate with each other, thus should \textcircled{6} authenticate and convince the opponent that its identity is valid. On this aspect, each lightweight node play two roles: it is a verifier based on its lightweight leger; and also a certificate owner, that should maintain its authentiation parameters, including secret key and auxiliary information.
+
+\subsection{Security Assumption}
+In our system, the rCA, as a core entity, is totally trusted. It securely preserves the security of secret keys and honestly generates the revocation transactions. The iCAs are not strictly honest; whereas, any entity can determine the certificate credibility according to the trust level of relevant iCA. Luckily, the blockchain does well in constructing the trust. 
+
+Any single blockchain full node is not honest, it may try responding spoofing transaction or hiding revocation event if it can benefit. However, the overall blockchain system is assumed safe and live based on the consensus mechanism; it is hard to send non-consensused block header due to the assumption of selected consensus mechanism. For instance, in PoW, malicious full nodes cannot succeed in puzzle solving game, thus leads to its shorter fork.
+
+The lightweight nodes cannot be trusted, they try to forge a valid certificate status, even if it has been revoked. In addition, malicious nodes will even forge a full node to broadcast false header to others and control the links. As a verifier, we assume that they will try their best to update their local ledger to the correct version. 
+
+This paper further assumes the communication links of lightweight node: 1) during long-lifetime interaction, the link is instable and insecure; 2) in its initialization phase, it has adequate resouce to update its local ledger to the latest and correct version, including other variables, e.g., bloom filter and accumulator.
+
+\subsection{Design Goals}
+Based on the security assumptions, AcBF should achieve the following properties as an efficient and secure scheme:  
 \begin{itemize}
-	\item The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. In AcBF, 
+	\item \textit{Revocation-detectable authentiation.} Only user's with valid and non-revoked certificate can authenticate successfully, faced with lightweight node.
+	\item \textit{Lightweight node-aware revocation.} No reocation event should slip on a lightweight node, even in an untrusted environment. 
+	\item \textit{Low-latency authentiation.} Latency should be strictely restricted regardless of any situation. 
+	\item \textit{Slight impact.} The above properties should be achieved without bringing much burden to honest entities, e.g, rCA and lightweight nodes.
 \end{itemize}
-
-multiple rCAs \cite{Gennaro2019FullyDG}
-
 \section{Construction}\label{sec:construction}
 \subsection{Revocation-Aware Block Format}
 \label{sec:format}
@@ -252,7 +282,7 @@ Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses o
 \end{algorithm}
 
 \subsubsection{Authentication}\label{section:authentication}
-When $U_i$ needs to authenticate itself to a lightwight verifier $V$, it should sign a certain message or achanllege with its $sk_i$. This paper focuses on the issue that how $U_i$ convinces $V$ that the relevant $pk_i$ is associated with a valid on-chain certificate.
+When $U_i$ needs to authenticate itself to a lightweight verifier $V$, it should sign a certain message or achanllege with its $sk_i$. This paper focuses on the issue that how $U_i$ convinces $V$ that the relevant $pk_i$ is associated with a valid on-chain certificate.
 
 The certificate validation message includes the certificate $cert_i$, its registered location $i_{Loc}$ (including $i_h$ and $i_p$), the auxiliary information of MHT $AUX_i$. If $U_i$ has got $W_i$, the witness of accumulator, then $W_i$ should also be in the message. The entire message is as 
 $$\sigma = \biggl(Sig(m; sk), cert_i, i_{Loc}, AUX_i, \mbox{\textit{optional }} W_i\biggr)$$
@@ -279,7 +309,7 @@ After this block is generated, other full nodes checks its validity including th
 	\item \textit{Structure:} $h_n = h_c + 1$, where $h_c$ is the largest height of stored block; $rx$ exists if Flag is ``1''; and all hashes are valid, including the previous hash.
 \end{itemize}
 
-After consensus, the block header, as well as $r_x$ and $R_c$ (the MHT root of only certificate registeration transaction) are transmitted to every lightweight node. 
+After consensus, the block header, as well as $r_x$ and $R_c$ (the MHT root of only certificate registration transaction) are transmitted to every lightweight node. 
 Upon the recept of the header, each lightweight node checks as: 
 \begin{enumerate}
 	\item If Flag is ``1'' without $rx$, the lightweight node should request $rx$ as well as $R_c$. Otherwise, finishes the check.
@@ -345,9 +375,38 @@ When a certificate is successfully revoked in a block (e.g., of height $i$), the
 \end{IEEEproof}
 
 \section{Performance Evaluation} \label{sec:efficiency}
+We implement AcBF and other compared schemes in C program with PBC library 0.5.14. The pairing and elliptic curves are MNT224 and SECP224r1, respectively. Bloom filter is realized with bitarray structure in Python 3.11.3. The CAs are built in XXXX, and other entities are implemented in Raspberry Pi platforms. The blockchain application is realized with Flask framework to realize network interactions, which is based on a public repository in \cite{implement}. 
+Lightweight nodes communicate with each other by a one-hop WiFi channel. While the full nodes connect distinct AS from the lightweight ones. 
+ 
+
+%@misc{implement,
+%  author = {OpensourceBooks},
+%  title = {blockchain},
+%  year = {2018},
+%  publisher = {GitHub},
+%  journal = {GitHub repository},
+%  howpublished = {\url{https://github.com/OpensourceBooks/blockchain}},
+%  commit = {4f57d6a0e4c030202a07a60bc1bb1ed1544bf679}
+%}
+
 \begin{table*}[t]
 	\caption{Performance Comparison with Related Schemes}
 	\label{table:compare}
+	\centering
+	\begin{tabular}{c | c |c|c | c |c c c}
+		\hline
+		\multirow{2}*{Scheme} & Lightweight & \multirow{2}*{Revokable} & Revocatin & Additional &\multicolumn{3}{c}{Impact on}\\
+		& node \textit{supp.} & & mechanism &method& Verifier  & Owner & CA\\
+		\hline
+		CertChain & \ding{55}& \checkmark & Bloom Filter\\
+		CertLedger & \ding{55}& \checkmark & MHT\\
+		ScalaCert &\ding{55}& \checkmark &\\
+		PROCESS &\ding{55}& \checkmark &\\
+		Jia \textit{et al.} \cite{jiaRedactableBlockchainDecentralized2022} &\ding{55}& \checkmark &\\
+		SmartDID & \checkmark & \ding{55} & \textit{n/a}\\ 
+		Proposed  & \checkmark & \checkmark & AcBF \\
+		\hline
+	\end{tabular}
 \end{table*}
 Compared with entire bloom filter with distinct parameters.
 
@@ -362,11 +421,11 @@ Blockchain is a promising technology to devise reliable and decentralized certif
 \cite{fromknechtDecentralizedPublicKey} proposed CertCoin to ensure identity retention with cryptocurrencies.  
 Compared with the traditional technique like CA-based PKI \cite{pki} and PGP method \cite{pgp}, the tamper free feature brought from blockchain tackles the gap between decentralized deployment and secure certificate management, respectively. 
 A totally decentralized model called SSI (self-sovereign identity) \cite{foundation_sovrin_2018} was designed by the Sovrin Foundation in 2018. In SSI, users' identities are registered in blockchain by themselves. 
-%while authorities are responsible for determining the privilege of each ID with off-chain credentials. 
+%while authorities are responsible for determination the privilege of each ID with off-chain credentials. 
 This idea has been realized in industrial implementations such as hyperledger indy \cite{indy} and uPort \cite{naik2020uport}, and attracted academic researches, like SmartDID \cite{smartdid}. However, the fully decentralized method does not suit practical systems, since it is complex to deal with the trust and revocation.
 
 Another way that blockchain improves identity system is to let the blockchain manage distributed CAs and certificate revocation list (CRL). Wang \textit{et al.} \cite{CTRT} realized a transparent revocation by enabling OCSP (Online Certificate Status Protocol) on blockchain.
-Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018a} proposed CertChain, in which a dependability-rank based consensus organized muliptle CAs and uses double counting bloom filter (DCBF) to shorten the volume of CRL. However, Luo \textit{et al.} \cite{luoScalaCertScalabilityOrientedPKI2022a} pointed out that DCBF still occupied too much storage resource on the chain. Chameleon hash \cite{ateniese2017redactable} enables redactable blockchain such that revocation can be realized without CRL, thus many schemes were proposed, such as \cite{luoScalaCertScalabilityOrientedPKI2022a,jiaRedactableBlockchainDecentralized2022,xuHealthchainBlockchainBasedPrivacy2019, xu2021k}. It is worth noting that block redaction is difficult to make everyone aware, additional mechanism shold be proposed, e.g., random freshness check \cite{luoScalaCertScalabilityOrientedPKI2022a}, RSA-based accumulator \cite{jiaRedactableBlockchainDecentralized2022}.
+Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018a} proposed CertChain, in which a dependability-rank based consensus organized muliptle CAs and uses double counting bloom filter (DCBF) to shorten the volume of CRL. However, Luo \textit{et al.} \cite{luoScalaCertScalabilityOrientedPKI2022a} pointed out that DCBF still occupied too much storage resource on the chain. Chameleon hash \cite{ateniese2017redactable} enables redactable blockchain such that revocation can be realized without CRL, thus many schemes were proposed, such as \cite{luoScalaCertScalabilityOrientedPKI2022a,jiaRedactableBlockchainDecentralized2022, xu2021k, jia2021process}. Note that block redaction is difficult to make everyone aware, additional mechanism shold be proposed, e.g., random freshness check \cite{luoScalaCertScalabilityOrientedPKI2022a}, RSA-based accumulator \cite{jiaRedactableBlockchainDecentralized2022} and CGBF \cite{jia2021process}.
 
 Due to the similar distributed architecture, blockchain-based identity is promising to secure the future ad-hoc networks, such as IoT and IoV \cite{cui2022efficient, singh2018branch, smartdid, yu2019blockchain}. Especially, SmartDID \textit{et al.} \cite{smartdid} supports lightweight node deployment, by taking into account the latency restriction, instable links, untrust peers. Whereas, we found that the above revocation mechanisms no longer works faced with a verifier only storing block headers. It is difficult for a lightweight node to cache and update CRL in time, especially when the downlink channel is not trust. Due to similar reasons, mechanisms in \cite{luoScalaCertScalabilityOrientedPKI2022a, jiaRedactableBlockchainDecentralized2022} also failed. Some schemes leveraged MHT \cite{certledger} or accumulator \cite{yu2019blockchain} to maintain all legitimate certificates, which seems to suit lightweight node since the verifier only needs to keep up with the root node or accumulator value. 
 However, they will bring in unbearable burden on certificate owners' side (which are also thin devices), as shown in Table \ref{table:compare}. 

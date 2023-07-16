@@ -40,7 +40,9 @@
     \begin{scope}[on background layer]
         \node(bcdomain)[draw=blue!40, dashed, thick, rectangle, fit=(fullbf)(bctext), rounded corners=3mm]{};
     \end{scope}
-    \node[single arrow, fill=blue!40, single arrow head extend=.2cm, font=\footnotesize, inner sep=0.5ex, single arrow head indent=0.2ex]at (1.7, 0){\textcircled{1}params publish};
+    \node[single arrow, fill=blue!40, single arrow head extend=.2cm, font=\footnotesize, inner sep=0.5ex, single arrow head indent=0.2ex]at (1.7, 0.5){\textcircled{1}params publish};
+    \node[single arrow, fill=red!40, single arrow head extend=.2cm, font=\footnotesize, inner sep=0.5ex, single arrow head indent=0.2ex]at (1.7, -0.2){\textcircled{4}revocation trans.};
+    \node[single arrow, fill=green!70!black!40, single arrow head extend=.2cm, font=\footnotesize, inner sep=0.5ex, single arrow head indent=0.2ex]at (1.7, -2.0){\textcircled{3}register trans.};
     %\node[single arrow, fill=blue!40, single arrow head extend=.2cm, rotate=-90, minimum height = 1cm, font=\footnotesize, inner sep=0.5ex, single arrow head indent=0.2ex]at (1, -2){};
     \node(lightweight) at (5.1, -5.5)[font=\small, text width =2cm, align=center]{Lightweight Nodes};
     \begin{scope}[on background layer]
