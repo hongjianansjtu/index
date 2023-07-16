@@ -40,8 +40,8 @@ The work presented in this paper aims at proposing a trusted blockchain-based id
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
-	\item We propose a lightweight on-chain certificate management, where the authentication phase costs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by designed accumulator-assisted bloom filter, thus the filter length can be drastically shortened without the problem of false detection. 
-	\item To the best of our knowledge, we are the first to enable low-latency and trusted authentication by constructing a blockchain scheme (AcBF), which makes the lightweight node be aware of revocation event according to block header. As a result, the identity status can be queried locally by the resource-constrained verifiers.
+	\item We propose a lightweight on-chain certificate management, where the authentication phase costs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by designed accumulator-assisted bloom filter (which is AcBF named from), thus the filter length can be drastically shortened without the problem of false detection. 
+	\item To the best of our knowledge, we are the first to enable low-latency and trusted authentication enabled by blockchain technology, which makes the lightweight node be aware of revocation event according to block header. As a result, the identity status can be queried locally by the resource-constrained verifiers.
 	\item We implement AcBF in our tested environment, and evaluate its performance in terms of computation and storage overhead in various procedures. Results show that AcBF informs every revocation to lightweight node, even in untrust network environment, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
 \end{enumerate}
 
@@ -72,7 +72,7 @@ Consider the $q$-Strong Diffie-Hellman Problem ($q$-SDH) as follows: given a tup
 
 \subsection{Bloom Filter}\label{section:bf}
 Bloom filter (or BF for short) is a space-efficient data structure to record a set, in order to support membership queries \cite{Bloom1970, broder2004network}.
-BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted as $0^m$). Another parameter $k$ is the number of independent hashes, each of which maps a member to a random bit of BF. The follows describe the functions of BF, which are to be used in the later context.
+BF is an array of $m$ boolean bits, whose initial status is all zeros (denoted as $0^m$). Another parameter $k$ is the number of independent hashes, each of which maps a member to a random bit of BF. The follows describe the functions of BF, which will be used in the later context.
 
 \begin{itemize}
     \item $BF.Add(x)$: To add an element $x$ to BF, it respectively hashes $x$ with the $k$ hashes of BF, and sets each of the mapped bit to 1.
@@ -99,12 +99,19 @@ R \overset{?}{=} h(h(h_{00}, h(cert_A)), h_1)
 \end{figure}
 
 \section{System and Security Model} \label{sec:model}
-As shown in Fig. \ref{architecture}, the proposed scheme works in a communication system with the following 3 kinds of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. The follows describe each of the entities. 
+As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication system with the following 3 kinds of entities: multiple CAs, lightweight nodes and a set of blockchain full nodes. The follows describe each of the entities. 
 
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=7.5cm]{model}
+	\caption{Blockchain-based Identity System Architecture}\label{fig:model}
+\end{figure}
 \begin{itemize}
-	\item The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. 
+	\item The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. In AcBF, 
 \end{itemize}
 
+multiple rCAs \cite{Gennaro2019FullyDG}
 
 \section{Construction}\label{sec:construction}
 \subsection{Revocation-Aware Block Format}
@@ -361,7 +368,7 @@ This idea has been realized in industrial implementations such as hyperledger in
 Another way that blockchain improves identity system is to let the blockchain manage distributed CAs and certificate revocation list (CRL). Wang \textit{et al.} \cite{CTRT} realized a transparent revocation by enabling OCSP (Online Certificate Status Protocol) on blockchain.
 Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018a} proposed CertChain, in which a dependability-rank based consensus organized muliptle CAs and uses double counting bloom filter (DCBF) to shorten the volume of CRL. However, Luo \textit{et al.} \cite{luoScalaCertScalabilityOrientedPKI2022a} pointed out that DCBF still occupied too much storage resource on the chain. Chameleon hash \cite{ateniese2017redactable} enables redactable blockchain such that revocation can be realized without CRL, thus many schemes were proposed, such as \cite{luoScalaCertScalabilityOrientedPKI2022a,jiaRedactableBlockchainDecentralized2022,xuHealthchainBlockchainBasedPrivacy2019, xu2021k}. It is worth noting that block redaction is difficult to make everyone aware, additional mechanism shold be proposed, e.g., random freshness check \cite{luoScalaCertScalabilityOrientedPKI2022a}, RSA-based accumulator \cite{jiaRedactableBlockchainDecentralized2022}.
 
-Due to the similar distributed architecture, blockchain-based identity is promising to secure the future ad-hoc networks, such as IoT and IoV \cite{cui2022efficient, singh2018branch, smartdid, yu2019blockchain}. Especially, SmartDID \textit{et al.} \cite{smartdid} supports lightweight node deployment, by taking into account the latency restriction, instable links, untrust peers. Whereas, we found that the above revocation mechanisms no longer works faced with a verifier only storing block headers. It is difficult for a lightweight node to cache and update CRL in time, especially when the downlink channel is not trust. Due to similar reasons, mechanisms in \cite{luoScalaCertScalabilityOrientedPKI2022a, jiaRedactableBlockchainDecentralized2022} also failed. Some schemes uses MHT \cite{certledger} or accumulator \cite{yu2019blockchain} to maintain all legitimate certificates, which seems to suit lightweight node since the verifier only needs to keep up with the root node or accumulator value. 
+Due to the similar distributed architecture, blockchain-based identity is promising to secure the future ad-hoc networks, such as IoT and IoV \cite{cui2022efficient, singh2018branch, smartdid, yu2019blockchain}. Especially, SmartDID \textit{et al.} \cite{smartdid} supports lightweight node deployment, by taking into account the latency restriction, instable links, untrust peers. Whereas, we found that the above revocation mechanisms no longer works faced with a verifier only storing block headers. It is difficult for a lightweight node to cache and update CRL in time, especially when the downlink channel is not trust. Due to similar reasons, mechanisms in \cite{luoScalaCertScalabilityOrientedPKI2022a, jiaRedactableBlockchainDecentralized2022} also failed. Some schemes leveraged MHT \cite{certledger} or accumulator \cite{yu2019blockchain} to maintain all legitimate certificates, which seems to suit lightweight node since the verifier only needs to keep up with the root node or accumulator value. 
 However, they will bring in unbearable burden on certificate owners' side (which are also thin devices), as shown in Table \ref{table:compare}. 
 
 In summary, to our best knowledge, AcBF is the first to realize revokable identity management, with extremely slight storage, computation and communication burden on both certificate owner and verifier's sides.
