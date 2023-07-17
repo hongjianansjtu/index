@@ -16,7 +16,7 @@
 \maketitle
 
 \begin{abstract}
-	Blockchain-based identity has brings great evolution due to its decentralized deployment, transparent and tamper-free ledger. Specification groups of B5G/6G are exploring approaches to integrate the technology to future network systems, e.g., Internet of Things, vehicular network, industrial communications. Note that devices in these systems are storage constrained with instable channels, thus requires lightweight node deployment. The security problem comes: revoked identity can forge a legitimate authentication, since the lightweight verifier does not maintain the revocation transactions. 
+	Blockchain-based identity brings in great evolution due to its decentralized deployment, transparent and tamper-free ledger. Specification groups of B5G/6G are exploring approaches to integrate the technology to future network systems, e.g., Internet of Things, vehicular network, industrial communications. Note that devices in these systems are storage constrained with instable channels, thus requires lightweight node deployment. The security problem comes: revoked identity can forge a legitimate authentication, since the lightweight verifier does not maintain the revocation transactions. 
 	This paper hence proposes AcBF, a novel revocable identity management scheme. Especially, it enables extremely low authentication latency by allowing the lightweight node to query the certificate's status locally. To realize this feature trustly, we first design a revocation transaction based on accumulator-assisted Bloom filter to minimize the storage of certificate status structure. Secondly, we further construct the blockchain protocol, with which, no revocation event will slip on any lightweight ledger, even in an insecure or instable communication environment.  
 	In addition, different from other no-CRL revocation mechanisms, AcBF brings much smaller impact on valid user to execute the revocation. %, and with quite a small probability.
 	Security and performance analysis
@@ -181,7 +181,7 @@ $$ \bigl\{ PP, \Delta, Y = g_2^\gamma, (m, k), H \bigr\}$$
 
 Blockchain full nodes are gathered by generating a genesis block $B_0$, whose header's format follows Table \ref{table:format}, with all-zeros fields, except the consensus. 
 
-The iCAs are registered in the blockchain as Section \ref{section:register}. As a distributed system, iCA's certificates should be registered in self-sovereign manner, while our AcBF also supports rCA's issuing, by using key pair $(\gamma, Y)$ with BLS signature \cite{boneh2004short}. Note that, iCA's certificate status is queried like other entities', hence the later content will not specifically describe the iCA's status check in authentication phase. 
+The iCAs are registered in the blockchain as Section \ref{section:register}. As a distributed system, iCA's certificates should be registered in self-sovereign manner, while our AcBF also supports rCA's issuing, by using key pair $(\gamma, Y)$ under any signature algorithm. Note that, iCA's certificate status is queried like other entities', hence the later content will not specifically describe the iCA's status check in authentication phase. 
 
 
 Every lightweight node initiates its ledger by updating the block headers from selected full nodes, like other lightweight node-supported schemes. In addition, it updates the Bloom filter $BF$ and accumulator value $\Delta$. As the full nodes are not trusted, the $BF$ and $\Delta$ are checked from the blocks with revocation transactions as depicted in Section \ref{sec:revoke}.
@@ -228,7 +228,7 @@ Especially, AcBF proposes an efficient accumulator method based on \cite{accumul
 	\item \textit{Update} helps the other members $x_i$ to update their witnesses with the input parameters.
 \end{itemize}
 The detailed execution of these functions are illustrated in Algorithm \ref{alg:accumulate}.
-Then, rCA uploads the revocation transaction $rx$ to the blockchain nodes with its signature $R_x$.
+Then, rCA submits $rx$ along with the signature $R_x$ to the blockchain nodes, using its secret key $\gamma$.
 
 \begin{algorithm}[t]
 	\renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -319,7 +319,7 @@ Upon the recept of the header, each lightweight node checks as:
 Whether full or lightweight nodes, if the Flag is ``1'', then invokes Algorithm \ref{alg:revokeNode} with the verified $rx$, to update local BF, accumulator value $\Delta$ and optionally its witness.
 After that, the lightweight node removes $r_x$, $R_x$ and $R_a$.
 
-\subsection{Parameter Determine for Bloom Filter} \label{section:parameter}
+\subsection{Parameter Determination for Bloom Filter} \label{section:parameter}
 
 The length of Bloom Filter in this paper can be dramatically decreased compared with other schemes for certificate revocation. This section gives a theoretical derivation for the relevant parameter.
 
@@ -367,30 +367,31 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
     If $q$-SDH assumption holds, the revocation method based on accumulator mechanism in Algorithm \ref{alg:accumulate} is sound against revoked identities.
 \end{lemma}
 \begin{IEEEproof}
-	The accumulator algorithm has been basically proved secure under $q$-SDH assumption in \cite{accumulator}, whereas, AcBF makes two modifications. Firstly, we remove the zero-knowledge proof (ZKP) to accelerate the authentication phase as \eqref{eq:authenticate}; Secondly, Add function inserts an arbitrary member value without changing the accumulator public value $\Delta$. 
+	The accumulator algorithm was basically proved secure under $q$-SDH assumption in \cite{accumulator}, whereas, AcBF makes two modifications. Firstly, we remove the zero-knowledge proof (ZKP) to accelerate the authentication phase as \eqref{eq:authenticate}; Secondly, \textit{Add} function inserts an arbitrary member value without changing the accumulator public value $\Delta$. 
 	
 	In fact, non-ZKP authentication only helps the adversary $\mathcal{A}$ to get the member secret (or the unique location $i_{Loc}$ in AcBF) and its witness $W_i$, compared with standard algorithm. Whereas, the $i_{Loc}$ is no longer secret in AcBF, and $\mathcal{A}$ cannot learn the information of the secret key $sk_i$, which is relevant to the public key in the transaction recorded in $i_{Loc}$. Thus, as long as the consensus mechanism is safe (to ensure that every $i_{Loc}$ is unique between certificates), the additional information in \eqref{eq:authenticate} brings no advantage to adversaries. On the other hand, we analyze the advantage from cryptographic perspective. A tuple $(\Delta, x, W = \Delta^{1/(x + \gamma)})$ can be reduced to $(B=h^{x+\gamma}, x, h)$, which leaks no knowledge on $\gamma$.
 	
-	The second modification makes our accumulator a stand $q$-SDH tuple. 
+	The second modification makes our accumulator be a stand $q$-SDH tuple: Given as system with a secret key $\gamma$, and public group elements $\Delta \in \mathbb{G}_1$, $(g_2, Y = g_2^\gamma)\in \mathbb{G}_2$. The hash of member value and its witness ($H(i_{Loc}), W_i$) is identical to the tuple $(x, \Delta^{1/(x+\gamma)})$. 
+
+	The Member \textit{Del} and \textit{Update} function in Algorithm \ref{alg:accumulate} is also identical to key revocation in BBS signature \cite{Boneh2004}. A intuitive description about the revocation capability is that the revoked user $U_j$ should deal with the problem of zero denominator to update its witness, as $x_i=x_j$. Formal reduction from BBS signature to $q$-SDH assumption is given in \cite{Boneh2004}. As our modified accumulator can be reduced to BBS, it is sementically secure under $q$-SDH assumption. 
 \end{IEEEproof}
 \begin{lemma}
     If the consensus protocol of the used blockchain is safe, the lightweight node is aware of every revocation when its ledger has been updated to relevant status.
 \end{lemma}
 
 \begin{IEEEproof}
-When a certificate is successfully revoked in a block (e.g., of height $i$), the Flag field of its header should be \textit{True}. As long as the consensus protocol has a strong safety property, the lightweight node will not accept the $i$-th block header with Flag field \textit{False}. 
+When a certificate is successfully revoked in a block (e.g., of height $i$), the Flag field of its header should be \textit{True}. As long as the consensus protocol has a strong safety property, the lightweight node $V$ will not accept the $i$-th block header with Flag field \textit{False}. 
+
+With the above result, any revocation transaction should be sent to the $V$ with the signature $R_x$ and auxiliary information $R_c$, where $R_c$ is the root value of all certificate registration transactions in this block. No adversary can hide or modify even one revocation item in this scenario due to the unforgeable signature and hash strength, even by forging a full node or controling the downlink channel.
 \end{IEEEproof}
 
 \subsection{Lightweight Overhead}
+AcBF achieves this property on two aspects. Firstly, a lightweight node requires no interaction with full nodes to validate any certificate's status, regardless of any cases, thus achieves extremely low-latency authentication. Secondly, it brings in slight impact on the system to maintain the reliable revcation.
 
-\section{Performance Evaluation} \label{sec:efficiency}
-We implement AcBF and other compared schemes in C program with PBC library 0.5.14. The pairing and elliptic curves are MNT224 and SECP224r1, respectively. Bloom filter is realized with bitarray structure in Python 3.11.3. The CAs are built on Ubuntu 20.04 platform by PCs with Intel Core i7-11700 @ 2.5GHz, and other entities are implemented in Raspberry Pi platforms. The blockchain application is realized with Flask framework to realize network interactions, which is based on a public repository in \cite{implement}. 
-Lightweight nodes communicate with each other by a one-hop WiFi channel. While the full nodes connect distinct AS from the lightweight ones. 
+On the first aspect, we use a short Bloom filter to record the revocation list, while uses accumulator to fix its false positive situation: a wronged user is a member of accumulator, thus achives fast authentication with an efficient member check as \eqref{eq:authenticate}. Without this method, when a user is checked as revoked, it requires the verifier to request relevant transaction from trusted full nodes to judge the real status. Furthermore, only wronged certificate needs additional check based on accumulator, the average latency is still similar to no-revocation method. 
 
-We briefly compare some representative work as shown in Table \ref{table:compare} in terms of critical factors for identity management. The detailed analysis are proposed in our later content. %From the high-level comparison, AcBF 
-Worth noting that, we tried our best to enhance the compared schemes to support lightweight nodes in our later evaluations. 
+On the second aspect, all entities cost negligible burden besides the basic block header update. 1) As a lightweight verifier, it only needs a short BF structure and an accumulator value to enable its validation ability. All revcation transactions should be erased after the verifier has update its BF and $\Delta$. 2) As an identity owner, it basically maintains the location and auxiliary information of its registered certificate. 3) Even as accumulator member, the \textit{Update} function only occurs when a user in accumulator is revoked, the probability is quite small. And compared with revocation based on smart contract or MHT, every user can update its witness with the public revocation transactions, thus costs no additional resources
 
- 
 
 \begin{table*}[t]
 	\caption{Performance Comparison with Related Schemes}
@@ -412,6 +413,16 @@ Worth noting that, we tried our best to enhance the compared schemes to support 
 		\hline
 	\end{tabular}
 \end{table*}
+
+\section{Performance Evaluation} \label{sec:efficiency}
+We implement AcBF and other compared schemes in C program with PBC library 0.5.14. The pairing and elliptic curves are MNT224 and SECP224r1, respectively. Bloom filter is realized with bitarray structure in Python 3.11.3. The CAs are built on Ubuntu 20.04 platform by PCs with 2.5GHz Intel Core i7-11700, and other entities are implemented in Raspberry Pi platforms. The blockchain application is realized with Flask framework to realize network interactions, which is based on a public repository in \cite{implement}. 
+Lightweight nodes communicate with each other by a one-hop WiFi channel, while full nodes connect distinct AS from the lightweight ones. 
+
+We briefly compare some representative work as shown in Table \ref{table:compare} in terms of critical factors for identity management. The detailed analysis are proposed in our later content. %From the high-level comparison, AcBF 
+Worth noting that, we tried our best to enhance the compared schemes to support lightweight nodes in our later evaluations. 
+
+ 
+
 
 
 
@@ -440,6 +451,8 @@ In summary, to our best knowledge, AcBF is the first to realize revokable identi
 %Liu \textit{et al}. \cite{liuBlockchainEmpoweredCooperative2020}  proposed a decentralized and traceable collaborative authentication mechanism  by introducing the mechanism of secret sharing and dynamic proxy technology to blockchain. 
 
 \section{Conclusion}\label{sec:conclusion}
+In this paper, we proposed AcBF, which realized a blockchain-based identity system for lightweight nodes.  
+
 \balance
 \bibliographystyle{IEEEtran}
 \bibliography{id}
