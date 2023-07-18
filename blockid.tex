@@ -11,7 +11,7 @@
 \usepackage{multirow}
 
 \title{AcBF: A Revocable Blockchain-based Identity Management Enabling Low-Latency Authentication}
-\author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, and Yue Wu}
+\author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, Yingjie Xue, and Yue Wu}
 \begin{document}
 \maketitle
 
@@ -37,7 +37,7 @@ This paper proposes a blockchain-based identity management scheme by deploying l
 
 The property of lightweight node has attracted many researchers to deploy blockchain in IoT, industrial environments, etc.. However, we should take more issues into account, before utilizing it to manage users' and devices' identities. The core problem is revocation! Let us take the following instance: a user's $U$ identity is registered in block $i$, and is later revoked in block $j$. If $U$ wants to authenticate its identity to a lightweight node, it can easily succeed in this forge: as $U$'s certificate still has a valid SPV method for block $i$, and the lightweight node is not informed of the revocation based on the stored block headers, unless $U$ consciously hands it up. Although some blockchain-based identity management schemes have proposed well designed revocation method \cite{luoScalaCertScalabilityOrientedPKI2022a,  wang2020blockchain,jiaRedactableBlockchainDecentralized2022,chenCertchainPublicEfficient2018a}, they no longer work in our system, as they require the verifier to master the whole blockchain data. 
 
-The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. The proposed work uses a short Bloom Filter to record the revoked certificates; and additionally leverages a pairing-based accumulator to achieve a precise certificate validity check, even with quite small storage. Different from related work, in order to tolerate the case when the forger controls the communication channel, we construst a new certificate management scheme (AcBF). In AcBF, with our designed revocation transaction and small-volume header structure, the lightweight verifier can be aware of the revocation events with only the received header, thus achieves trust local query to improve the efficiency and reliability. 
+The work presented in this paper aims at proposing a trusted blockchain-based identity management scheme, whose authentication method well resists the revoked users' forging. The proposed work uses a short Bloom filter to record the revoked certificates; and additionally leverages a pairing-based accumulator to achieve a precise certificate validity check, even with quite small storage. Different from related work, in order to tolerate the case when the forger controls the communication channel, we construst a new certificate management scheme (AcBF). In AcBF, with our designed revocation transaction and small-volume header structure, the lightweight verifier can be aware of the revocation events with only the received header, thus achieves trust local query to improve the efficiency and reliability. 
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
@@ -292,7 +292,7 @@ Upon the recept of $\sigma$, $V$ checks the follows:
 	\item \textit{Existence}: the tuple $(R, cert_i, AUX_i)$ as \eqref{eq:aux}, where $R$ is the MHT field of the $i_h$-th block.
 	\item \textit{Non-revocation}: If $\sigma$ does not contain $W_i$, checks $$BF.Check(i_{Loc})\overset{?}{=} 0;$$ Else, checks 
 	\begin{align} \label{eq:authenticate}
-		e(W_i, g^{H(i_{Loc})}\cdot Y) \overset{?}{=} e(\Delta, g_2)
+		e(W_i, g_2^{H(i_{Loc})}\cdot Y) \overset{?}{=} e(\Delta, g_2)
 	\end{align}
 	\item The signature is validated with public key in $cert_i$.
 \end{itemize}
@@ -451,7 +451,7 @@ In summary, to our best knowledge, AcBF is the first to realize revokable identi
 %Liu \textit{et al}. \cite{liuBlockchainEmpoweredCooperative2020}  proposed a decentralized and traceable collaborative authentication mechanism  by introducing the mechanism of secret sharing and dynamic proxy technology to blockchain. 
 
 \section{Conclusion}\label{sec:conclusion}
-In this paper, we proposed AcBF, which realized a blockchain-based identity system for lightweight nodes.  
+In this paper, we have proposed AcBF to blockchain-based identity system for lightweight nodes, which is the first that realize certificate revocation with storage constrained ledger as a verifier. By systematically investigating the problems of trust authentication scenarios for lightweight nodes, we constructed a security model for the identity system. With the utilization of accumulator-assist short Bloom filter, AcBF has achieved the minimal volume to maintain the revocation data, as well as local verification regardless of any situations, thus offered a low-latency authentication. Furthermore, a new ledger structure and protocol has been proposed for lightweight node, which helps the 
 
 \balance
 \bibliographystyle{IEEEtran}
