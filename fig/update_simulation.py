@@ -14,11 +14,11 @@ def dict_to_str(d: dict):
 
 height = 100
 
-regis_event = np.random.poisson(500, height)
-revoke_event = [int(i) for i in np.floor(np.random.exponential(62.5, height - 20))]
+regis_event = np.random.poisson(5000, height)
+revoke_event = [int(i) for i in np.floor(np.random.exponential(625, height - 20))]
 print(revoke_event)
 # BF: delta, n, theta
-acbf = BloomFilter(5000, 45000, 5000)
+acbf = BloomFilter(50000, 450000, 50000)
 
 # 'Time': 轮次, 'Register': 本轮注册数, 'Valid_user_num': 总有效用户, 'Revoke': 本轮撤销数, 'Revoked_user_num': 总撤销用户,
 # 'BF_false_positive': BF总误判数, 'New_acc_wit': 本轮新加入Acc数, 'Revoke_in_acc': 本轮从Acc中删除数,
