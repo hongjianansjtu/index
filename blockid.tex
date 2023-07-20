@@ -194,6 +194,7 @@ For the clarity of construction description, Table \ref{tab:notation} lists the 
 		$i_{Loc}$ & $i_{Loc} = (i_h, i_p)$ is the location of $cert_i$ \\
 		$AUX_i$ & The auxiliary information of $cert_i$ for MHT \\
 		$W_i$ & Witness of $cert_i$ as an accumulator member \\
+		$T_i$ & A flag indicates whether $U_i$ should use accumulator \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -215,13 +216,16 @@ Every lightweight node initiates its ledger by updating the block headers from s
 \subsubsection{Certificate Register}\label{section:register}
 From an arbitrary trusted iCA, each entity $U_i$ applies this phase to register an on-chain certificate $cert_i$. The certificate in AcBF is basically similar to that in X.509, except that AcBF does not need the globally unique sequence number. Instead, AcBF uses its unique location $i_{Loc} = (i_h, i_p)$ in blockchain to identify the certificate, where $i_h$ is denoted as the height of registered block, and $i_p$ is its path in MHT. Fig. \ref{fig:mht} gives an instance of a certificate's unique location. 
 
-$U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions). After the consensus and broadcast of the block as Section \ref{section:block_consensus}, this phase is completed with $U_i$ gets its $i_{Loc}$ and the auxiliary information of MHT $AUX_i$.
+$U_i$ securely stores a secret key $sk_i$, whose relevant public key $pk_i$ is included in $cert_i$. The $U_i$ should wait for this certificate to be gathered with other transactions (including registration and revocation transactions). After the consensus and broadcast of the block as Section \ref{section:block_consensus}, this phase is completed with $U_i$ gets its $i_{Loc}$ and the auxiliary information of MHT $AUX_i$. It securely stores the following parameters locally:
+$$(cert_i, i_{Loc}, sk_i, AUX_i, T_i = 0),$$
+In which, $T_i = 0$ means that $U_i$ initially can authenticate directly, without the usage of accumulator.
 
 
 \subsubsection{Revocation} \label{sec:revoke}
 This phase consists of 1) execution by rCA, and 2) reaction by other entities, especially the lightweight nodes. 
 
 1) To execute revocation, rCA prepares a temporary revocation list $\mathbb{R}$ gathers revocation request from legal iCAs and certificate owners. After validation of each request (which is beyond the scope of this paper), rCA appends the location $i_{Loc}$ of the certificate to $\mathbb{R}$ until it invokes Algorithm \ref{alg:revokeCA} to generate revocation transaction. 
+
 
 
 \begin{algorithm}[t]
@@ -254,7 +258,11 @@ Especially, AcBF proposes an efficient accumulator method based on \cite{accumul
 	\item \textit{Update} helps the other members $x_i$ to update their witnesses with the input parameters.
 \end{itemize}
 The detailed execution of these functions are illustrated in Algorithm \ref{alg:accumulate}.
-Then, rCA submits $rx$ along with the signature $R_x$ to the blockchain nodes, using its secret key $\gamma$.
+Then, rCA submits $rx$ along with the signature $R_x$ to the blockchain nodes, using its secret key $\gamma$. AcBF does not restrict the signature algorithm for revocation transactions, in fact any short and secure method can be implemented, such as BLS \cite{boneh2004short} signature. The format of signature $R_x$ and its verification are as \eqref{eq:signature} and \eqref{eq:verify}, respectively.
+\begin{align}
+\sigma = & H_1(rx)^\gamma \label{eq:signature}\\
+e(\sigma, g_2)=& e(H_1(rx), Y) \label{eq:verify}
+\end{align}
 
 \begin{algorithm}[t]
 	\renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -279,15 +287,18 @@ Then, rCA submits $rx$ along with the signature $R_x$ to the blockchain nodes, u
 Note that, as $x_i$ in AcBF is a location format, the real input uses $H(x_i)$ to replace $x_i$. 
 \end{algorithm}
 
-2) When a lightweight node $U_i$ invokes the revocation by the notification of Flag field as Section \ref{section:block_consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and executes Algorithm \ref{alg:revokeNode}.
+2) When a lightweight node $U_i$ invokes the revocation reaction by the notification of Flag field as Section \ref{section:block_consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and executes Algorithm \ref{alg:revokeNode}.
 
-Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses on the case a legal user will be innocently checked as revoked one if only with Bloom filter. Whereas, AcBF uses the accumulator $\Delta$ to fix this problem. The rCA will be responsible for this request since it has the entire revocation list $\mathbb{R}_x$.
+Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses on the case a legal user will be innocently checked as revoked one if only with Bloom filter. Whereas, AcBF uses the accumulator $\Delta$ to fix this problem. 
+The rCA checks the follows: Firstly, $U_i$'s unique location is not in current $\mathbb{R}_x$, such that it is a valid user; Secondly, checks 
+$$BF.Check(i_{Loc}) = 1,$$
+which indicates that it is innocent. If the above hold, rCA responds the request; otherwise, it aborts.
 
 \begin{algorithm}[t]
 	\renewcommand{\algorithmicensure}{\textbf{Output:}}
 	\caption{Revocation Reaction by Lightweight Node $U_i$}\label{alg:revokeNode}
 	\begin{algorithmic}[1]
-		\Require $BF, i_{Loc}, L, \mathbb{R}, W_i$. \Comment{$W_i$ is input only if $i_{Loc}\in\Delta$}
+		\Require $BF, i_{Loc}, L, \mathbb{R}, W_i \text{ if } T_i=1$
 		\Ensure $\Delta$
 		\If{$L\neq\emptyset$}
 		\State Update $\Delta$ as the last tuple of $L$
@@ -295,14 +306,14 @@ Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses o
 		\ForAll{$x \in \mathbb{R}$}
 		\State $BF.Add(x)$ 
 		\EndFor
-		\If{$W_i$ is input} 
-		\ForAll{$(x_j, \Delta) \in L$}
-		\State $W_i\gets Update((i_{Loc}, W_i), \Delta)$ \Comment{Line \ref{fuction:update} of Alg. \ref{alg:accumulate}}
+		\If{$T_i =1$} 
+		\ForAll{$(x_j, \Delta_j) \in L$}
+		\State $W_i\gets Update((i_{Loc}, W_i), \Delta_j)$ \Comment{Line \ref{fuction:update} of Alg. \ref{alg:accumulate}}
 		\EndFor
 		\ElsIf{$BF.Check(i_{Loc})$}
-		\State Invoke $Add(\Delta, i_{Loc})$ with rCA to get $W_i$ \label{line:apply_accumulator}
+		\State Invoke $W_i \gets Add(\Delta, i_{Loc})$ with rCA \label{line:apply_accumulator}
 		
-		\Return $W_i$ as $U_i$'s witness
+		\Return $W_i$ and $T_i \gets 1$
 		\EndIf
 	\end{algorithmic}
 \end{algorithm}
@@ -311,7 +322,7 @@ Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses o
 When $U_i$ needs to authenticate itself to a lightweight verifier $V$, it should sign a certain message or a challenge with its $sk_i$. This paper focuses on the issue that how $U_i$ convinces $V$ that the relevant $pk_i$ is associated with a valid on-chain certificate.
 
 The certificate validation message includes the certificate $cert_i$, its registered location $i_{Loc}$ (including $i_h$ and $i_p$), the auxiliary information of MHT $AUX_i$. If $U_i$ has got $W_i$, the witness of accumulator, then $W_i$ should also be in the message. The entire message is as 
-$$\sigma = \biggl(Sig(m; sk), cert_i, i_{Loc}, AUX_i, \mbox{\textit{optional }} W_i\biggr)$$
+$$\sigma = \biggl(Sig(m; sk), cert_i, i_{Loc}, AUX_i; W_i \text{ if } T_i =1 \biggr)$$
 
 Upon the recept of $\sigma$, $V$ checks the follows:
 \begin{itemize}
@@ -322,7 +333,7 @@ Upon the recept of $\sigma$, $V$ checks the follows:
 	\end{align}
 	\item The signature is validated with public key in $cert_i$.
 \end{itemize}
-If the above is all passed, $V$ is convinced that $U_i$ is valid. Otherwise, the authentiation is failure. 
+If the above is all passed, $V$ is convinced that $U_i$ is valid. Otherwise, the authentication is failure. 
 
 
 \subsubsection{Block Generate and Broadcast}\label{section:block_consensus}
@@ -408,12 +419,17 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 \begin{IEEEproof}
 When a certificate is successfully revoked in a block (e.g., of height $i$), the Flag field of its header should be \textit{True}. As long as the consensus protocol has a strong safety property, the lightweight node $V$ will not accept the $i$-th block header with Flag field \textit{False}. 
 
-With the above result, any revocation transaction should be sent to the $V$ with the signature $R_x$ and auxiliary information $R_c$, where $R_c$ is the root value of all certificate registration transactions in this block. No adversary can hide or modify even one revocation item in this scenario due to the unforgeable signature and hash strength, even by forging a full node or controling the downlink channel.
+With the above result, any revocation transaction should be sent to the $V$ with the signature $R_x$ and auxiliary information $R_c$, where $R_c$ is the root value of all certificate registration transactions in this block. No adversary can hide or modify even one revocation item in this scenario due to the unforgeable signature and hash strength, even by forging a full node or controlling the downlink channel.
 \end{IEEEproof}
 
 \subsection{Accurate Revocation Policy}
 
-xxxxxxx
+Note that every identity's $T_i$ is a logical and locally stored boolean parameter. In the whole procedure of AcBF, it is not transferred in any cases. Analysis of revocation soundness in Theorem \ref{theo:security} has already shown that authentication phase will detect every certificates precisely without explicit $T_i$ indication. This section discusses if the rCA can accurately deal with revocation algorithms. Here, accuracy means two sides, completeness and low-impact. The first requires that every revocation should be added in AcBF revocation data structure; the second tries to add as least accumulator members as possible. 
+
+On the one side, as long as rCA executes Algorithm \ref{alg:revokeCA} correctely, the revocation will executed completely. Since every newly revoked certificate in $\mathbb{R}$ is added in the short Bloom filter. We further check if every element in  $\mathbb{R}$ that their BF check has already been \textit{True} with the old-version BF, which indicates the certificate may already been an accumulator member (e.gl, it was once an innocent user, and applied the member). 
+
+
+
 
 \subsection{Lightweight Overhead}
 AcBF achieves this property on two aspects. Firstly, a lightweight node requires no interaction with full nodes to validate any certificate's status, regardless of any cases, thus achieves extremely low-latency authentication. Secondly, it brings in slight impact on the system to maintain the reliable revcation.
@@ -451,7 +467,7 @@ In addition, compared with revocation based on smart contract or MHT, every user
 \end{table*}
 
 \section{Performance Evaluation} \label{sec:efficiency}
-We implement AcBF and other compared schemes in C program with PBC library 0.5.14. The pairing and elliptic curves are MNT224 and SECP224r1, respectively. Bloom filter is realized with bitarray structure in Python 3.11.3. The CAs are built on Ubuntu 20.04 platform by PCs with 2.5GHz Intel Core i7-11700, and other entities are implemented in Raspberry Pi platforms. The blockchain application is realized with Flask framework to realize network interactions, which is based on a public repository in \cite{implement}. 
+We implement AcBF and other compared schemes in C program with PBC library 0.5.14. The pairing and elliptic curves are MNT224 and SECP224r1, respectively. Bloom filter is realized with bitarray structure in Python 3.11.3. The CAs are built on Ubuntu 20.04 platform by PCs with 2.5GHz Intel Core i7-11700, and other entities are built in Raspberry Pi platforms. The blockchain application is realized with Flask framework to realize network interactions, which is based on a public repository in \cite{implement}. 
 Lightweight nodes communicate with each other by a one-hop WiFi channel, while full nodes connect distinct AS from the lightweight ones. 
 
 We briefly compare some representative work as shown in Table \ref{table:compare} in terms of critical factors for identity management. The detailed analysis are proposed in our later content. %From the high-level comparison, AcBF 
