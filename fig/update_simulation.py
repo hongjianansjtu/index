@@ -12,14 +12,13 @@ from bf import *
 def dict_to_str(d: dict):
     return str(sorted(d.items()))
 
-
 height = 100
 
-regis_event = np.random.poisson(1000, height)
-revoke_event = [int(i) for i in np.floor(np.random.exponential(50, height - 20))]
+regis_event = np.random.poisson(5000, height)
+revoke_event = [int(i) for i in np.floor(np.random.exponential(625, height - 20))]
 print(revoke_event)
 # BF: delta, n, theta
-acbf = BloomFilter(4000, 96000, 9600)
+acbf = BloomFilter(50000, 450000, 50000)
 
 # 'Time': 轮次, 'Register': 本轮注册数, 'Valid_user_num': 总有效用户, 'Revoke': 本轮撤销数, 'Revoked_user_num': 总撤销用户,
 # 'BF_false_positive': BF总误判数, 'New_acc_wit': 本轮新加入Acc数, 'Revoke_in_acc': 本轮从Acc中删除数,
@@ -82,15 +81,10 @@ def update(i):
                 revoke_height.add(index['height'])
             except ValueError as e:
                 print(e)
-    for index in user_cert:
-        if acbf.check(dict_to_str(index)) == True:
-            fp_t += 1
-            acc.add(dict_to_str(index))
-    for h in revoke_height:
-        ch_t += regis_event[h]
+
     if i == height - 1:
         for index in user_cert:
-            print(index)
+            # print(index)
             update_overhead['id'].append(index['id'])
 
             # ch
@@ -100,9 +94,9 @@ def update(i):
                 update_overhead['CH'].append(0)
             # acbf
             if acbf.check(dict_to_str(index)) == True:
-                # update
+                # update witness
                 if dict_to_str(index) in acc:
-                    update_overhead['AcBF'].append(update_witness[random.randint(0, 999)])
+                    update_overhead['AcBF'].append(update_witness[random.randint(0, 999)] + rtt[random.randint(0, 1499)])
                 # claim
                 else:
                     update_overhead['AcBF'].append(claimAccumulator[random.randint(0, 999)] + rtt[random.randint(0, 1499)])
@@ -110,9 +104,8 @@ def update(i):
                 update_overhead['AcBF'].append(0)
 
             # mht，acc 有撤销就全体都要更新
-            update_overhead['Acc'].append(update_witness[random.randint(0, 999)])
+            update_overhead['Acc'].append(update_witness[random.randint(0, 999)] + rtt[random.randint(0, 1499)])
             update_overhead['MHT'].append(rtt[random.randint(0, 1499)])
-
 
     for index in user_cert:
         if acbf.check(dict_to_str(index)) == True:
@@ -171,3 +164,17 @@ df1.to_csv('stat.csv', index=False)
 
 df2 = pd.DataFrame(update_overhead)
 df2.to_csv('update_overhead.csv', index=False)
+
+# update_overhead = {'id': [], 'CH': [], 'Acc': [], 'MHT': [], 'AcBF': []}
+
+CH = 0
+for i in update_overhead['CH']:
+    if i > 0.01:
+        CH += 1
+print(CH)
+
+Acc = 0
+for i in update_overhead['AcBF']:
+    if i > 0.01:
+        Acc += 1
+print(Acc)
