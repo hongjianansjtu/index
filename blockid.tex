@@ -9,7 +9,8 @@
 \newtheorem{definition}{Definition}
 \usepackage{hyperref}
 \usepackage{multirow}
-
+\usepackage{caption}
+\usepackage{subcaption}
 \title{AcBF: A Revocable Blockchain-based Identity Management Enabling Low-Latency Authentication}
 \author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, Yingjie Xue, and Yue Wu}
 \begin{document}
@@ -257,7 +258,14 @@ Especially, AcBF proposes an efficient accumulator method based on \cite{accumul
 	\item \textit{Del} removes the member $x_i$ by updating the value $\Delta$;
 	\item \textit{Update} helps the other members $x_i$ to update their witnesses with the input parameters.
 \end{itemize}
-The detailed execution of these functions are illustrated in Algorithm \ref{alg:accumulate}.
+The detailed execution of these functions are illustrated in Algorithm \ref{alg:accumulate}. Especially, the Update is correct as 
+\begin{align}
+	W_i =& (W_{i(old)}/\Delta)^{1/(x_j - x_i)} \\
+	= & (\Delta_{old}^{\frac{1}{x_i+\gamma} - \frac{1}{x_j+\gamma}})^{1/(x_j-x_i)} \nonumber \\
+	= & (\Delta_{old}^{\frac{1}{x_j+\gamma}})^{\frac{1}{x_i+\gamma}} = \Delta^{1/(x_i+\gamma)} \nonumber
+\end{align}
+where $W_{i(old)}$ and $\Delta_{old}$ is the $U_i$'s valid witness and accumulator value before $x_j$'s Delete function.
+
 Then, rCA submits $rx$ along with the signature $R_x$ to the blockchain nodes, using its secret key $\gamma$. AcBF does not restrict the signature algorithm for revocation transactions, in fact any short and secure method can be implemented, such as BLS \cite{boneh2004short} signature. The format of signature $R_x$ and its verification are as \eqref{eq:signature} and \eqref{eq:verify}, respectively.
 \begin{align}
 \sigma = & H_1(rx)^\gamma \label{eq:signature}\\
@@ -424,9 +432,11 @@ With the above result, any revocation transaction should be sent to the $V$ with
 
 \subsection{Accurate Revocation Policy}
 
-Note that every identity's $T_i$ is a logical and locally stored boolean parameter. In the whole procedure of AcBF, it is not transferred in any cases. Analysis of revocation soundness in Theorem \ref{theo:security} has already shown that authentication phase will detect every certificates precisely without explicit $T_i$ indication. This section discusses if the rCA can accurately deal with revocation algorithms. Here, accuracy means two sides, completeness and low-impact. The first requires that every revocation should be added in AcBF revocation data structure; the second tries to add as least accumulator members as possible. 
+Note that every identity's $T_i$ is a logical and locally stored boolean parameter. In the whole procedure of AcBF, it is not transferred in any cases. Analysis of revocation soundness in Theorem \ref{theo:security} has already shown that authentication phase will detect every certificates precisely without explicit $T_i$ indication. This section discusses if the rCA can accurately deal with revocation algorithms. Here, accuracy means two sides, completeness and low-impact. The first requires that every revocation should be added in AcBF revocation data structure; the second tries to affect as least accumulator members as possible. 
 
-On the one side, as long as rCA executes Algorithm \ref{alg:revokeCA} correctely, the revocation will executed completely. Since every newly revoked certificate in $\mathbb{R}$ is added in the short Bloom filter. We further check if every element in  $\mathbb{R}$ that their BF check has already been \textit{True} with the old-version BF, which indicates the certificate may already been an accumulator member (e.gl, it was once an innocent user, and applied the member). 
+On the one side, as long as rCA executes Algorithm \ref{alg:revokeCA} correctely, the revocation will executed completely. Since every newly revoked certificate in $\mathbb{R}$ is added in the short Bloom filter. We further check if every element in  $\mathbb{R}$ that their BF check has already been \textit{True} with the old-version BF, which indicates that the certificate may already been an accumulator member (e.g, it was once an innocent user, and applied the member). The member Add function requires an efficient check, such that the relevant certificate's further revocation will succeed. As a summary, we design a lightweight algorithm for rCA to achieve a complete revocation.
+
+On the other side, we use a temporary Bloom field $BF_{tmp}$ in Algorithm \ref{alg:revokeCA} to minimize the impact: the accumulator $Del$ function is not invoked in the case, when the certificate is checked false in current BF of other entities, but is checked revoked in the rCA. The issue is intuitive, but without the proposed revocation policy, it will be difficult or inefficient to realize it (e.g. additionally maintain a list of all accumulator members).
 
 
 
@@ -478,13 +488,33 @@ Worth noting that, we tried our best to enhance the compared schemes to support 
  2) impact on owners: impact user number, time cost for different cases. 
 
 
+ \begin{figure*}[!htb]
+    \centering
+    \begin{minipage}{.35\textwidth}
+        \centering
+        \includegraphics[width=1.0\linewidth]{storage_overhead}
+        \caption{Storage on Verifier for Revocation}
+        \label{fig:withBF}
+    \end{minipage}%
+    \begin{minipage}{0.64\textwidth}
+		\begin{subfigure}[b]{0.49\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Impact_on_owner}
+			\caption{Time Cost for 1-Round}
+			\label{fig:owner_time}
+		\end{subfigure}
+		%\hfill
+		\begin{subfigure}[b]{0.49\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{update}
+			\caption{Affected Number During Lifetime}
+			\label{fig:owner_number}
+		\end{subfigure}
+        \caption{Evaluation Result on Owners' Reaction for Revocation}
+        \label{fig:owner}	
+    \end{minipage}
+\end{figure*}
 
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=7cm]{storage_overhead}
-	\caption{Storage on Verifier Side for Revocation}\label{fig:withBF}
-\end{figure}
 
 \section{Related Works}\label{section:related}
 Blockchain is a promising technology to devise reliable and decentralized certificate management. Fromknecht \textit{et al}. 
