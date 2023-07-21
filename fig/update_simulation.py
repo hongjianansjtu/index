@@ -12,6 +12,7 @@ from bf import *
 def dict_to_str(d: dict):
     return str(sorted(d.items()))
 
+
 height = 100
 
 regis_event = np.random.poisson(5000, height)
@@ -80,7 +81,7 @@ def update(i):
                 regis_event[index['height']] -= 1
                 revoke_height.add(index['height'])
             except ValueError as e:
-                print(e)
+                pass
 
     if i == height - 1:
         for index in user_cert:
@@ -96,7 +97,7 @@ def update(i):
             if acbf.check(dict_to_str(index)) == True:
                 # update witness
                 if dict_to_str(index) in acc:
-                    update_overhead['AcBF'].append(update_witness[random.randint(0, 999)] + rtt[random.randint(0, 1499)])
+                    update_overhead['AcBF'].append(update_witness[random.randint(0, 999)])
                 # claim
                 else:
                     update_overhead['AcBF'].append(claimAccumulator[random.randint(0, 999)] + rtt[random.randint(0, 1499)])
@@ -104,7 +105,7 @@ def update(i):
                 update_overhead['AcBF'].append(0)
 
             # mht，acc 有撤销就全体都要更新
-            update_overhead['Acc'].append(update_witness[random.randint(0, 999)] + rtt[random.randint(0, 1499)])
+            update_overhead['Acc'].append(update_witness[random.randint(0, 999)])
             update_overhead['MHT'].append(rtt[random.randint(0, 1499)])
 
     for index in user_cert:
