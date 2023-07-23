@@ -12,19 +12,18 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \title{AcBF: A Revocable Blockchain-based Identity Management Enabling Low-Latency Authentication}
-%\author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, Yingjie Xue, and Yue Wu}
+%\author{Jianan Hong, Jia Cheng, Yuqing Li, Jiayue Zhou, Yingjie Xue, Yue Wu, and Futai Zou}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-	Blockchain-based identity brings in great evolution due to its decentralized deployment, transparent and tamper-free ledger. Specification groups of B5G/6G are exploring approaches to integrate the technology to future network systems, e.g., Internet of Things, vehicular network, industrial communications. Note that devices in these systems are storage constrained with unstable channels, thus requires lightweight node deployment. The security problem comes: revoked identity can forge a legitimate authentication, since the lightweight verifier does not maintain the revocation transactions. 
-	This paper hence proposes AcBF, a novel revocable identity management scheme. Especially, it enables extremely low authentication latency by allowing the lightweight node to query the certificate's status locally. To realize this feature trustfully, we first design a revocation transaction based on accumulator-assisted Bloom filter to minimize the storage of certificate status structure. Secondly, we further construct the blockchain protocol, with which, no revocation event will slip on any lightweight ledger, even in an insecure or unstable communication environment.  
-	In addition, different from other no-CRL revocation mechanisms, AcBF brings much smaller impact on valid user to execute the revocation. %, and with quite a small probability.
-	Security and performance analysis
-	shows that AcBF has strong security and advantageous efficiency on both lightweight verifiers and certificate owners, thus suits identity management systems with low-latency constraints.
+	Blockchain-based identity brings in great evolution due to its decentralized deployment, transparent and tamper-free ledger. Specification groups of B5G/6G are exploring into integrate the technology to future network systems, e.g., Internet of Things, vehicular network, industrial communications. However, devices in these systems often have storage constraints and unstable channels,  which necessitates lightweight node deployment. The security issue arises: revoked identity can forge a legitimate authentication, since the lightweight verifier does not maintain the revocation transactions. 
+	This paper hence proposes AcBF, a novel revocable identity management scheme, that enables extremely low authentication latency by allowing the lightweight node to query the certificate's status locally. To realize this feature trustfully, we first design a revocation transaction based on accumulator-assisted Bloom filter to minimize the storage of certificate status structure. Secondly, we construct the blockchain protocol to ensure no revocation event to slip on any lightweight ledger, even in an insecure or unstable communication environment.  
+	In addition, different from other revocation mechanisms, AcBF minimizes the impact on valid users during the revocation process. %, and with quite a small probability.
+	Through security and performance analysis, AcBF has shown strong security and advantageous efficiency on both lightweight verifiers and certificate owners, thus suits identity management systems with low-latency constraints.
 \end{abstract}
 \begin{IEEEkeywords}
-    Blockchain identity, revocation-aware authentication, lightweight node, low latency
+    Blockchain identity, Revocation-aware authentication, Lightweight node, Low latency
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -44,13 +43,13 @@ Aiming at this challenge, this paper proposes a lightweight node-support identit
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
-	\item We propose a lightweight on-chain certificate management, where the authentication phase costs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by designed accumulator-assisted Bloom filter (which is AcBF named from), thus the filter length can be drastically shortened without the problem of false detection. 
-	\item To our best knowledge, we are the first to enable low-latency and trusted authentication by enabling lightweight node deployment, which makes the lightweight node be aware of revocation event totally according to block header. This important feature provides the lightweight node with the ability to query identity status locally, thus signicantly decreases the latency.
-	\item We implement AcBF in our tested environment, and evaluate its performance in terms of computation and storage overhead in various procedures. Results show that AcBF informs every revocation to lightweight node, even in insecure network environment, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
+	\item We propose a lightweight on-chain certificate management, where the authentication phase incurs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by an accumulator-assisted Bloom filter, thus the filter length can be drastically shortened without the issue of false detection. 
+	\item To our best knowledge, we are the first to enable trust and low-latency authentication by facilitating the deployment of lightweight nodes, which makes them be aware of revocation event totally according to the block header. This crucial feature allows the lightweight node to query identity status locally, thus signicantly decreases the latency.
+	\item We implement AcBF in our blockchain system, and evaluate its performance in terms of computation and storage overhead. Results show that AcBF informs every revocation to lightweight nodes, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
 \end{enumerate}
 
-The rest of this paper is organized as follows. We will
-introduce necessary preliminaries in Section \ref{sec:preliminary}, and in Section \ref{sec:model} we present the system model, followed with the security requirements of AcBF. Detailed Construction is presented in Section \ref{sec:construction}. Then formal security proof and experimental result analysis are shown in Section \ref{sec:security} and \ref{sec:efficiency}, respectively. Section \ref{section:related} briefly discusses the related work. Finally, in Section \ref{sec:conclusion}, we conclude this paper. 
+%The rest of this paper is organized as follows. We will
+%introduce necessary preliminaries in Section \ref{sec:preliminary}, and in Section \ref{sec:model} we present the system model, followed with the security requirements of AcBF. Detailed Construction is presented in Section \ref{sec:construction}. Then formal security proof and experimental result analysis are shown in Section \ref{sec:security} and \ref{sec:efficiency}, respectively. Section \ref{section:related} briefly discusses the related work. Finally, in Section \ref{sec:conclusion}, we conclude this paper. 
 
 
 \section{Preliminaries}\label{sec:preliminary}
@@ -99,7 +98,7 @@ R \overset{?}{=} h(h(h_{00}, h(cert_A)), h_1)
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=8.5cm]{mht}
-	\caption{Instance of merkle hash tree (MHT) with necessary definitions}\label{fig:mht}
+	\caption{Instance of merkle hash tree (MHT)}\label{fig:mht}
 \end{figure}
 
 \section{System and Security Model} \label{sec:model}
@@ -108,7 +107,7 @@ As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication s
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=7.5cm]{model}
+	\includegraphics[width=6.5cm]{model}
 	\caption{Blockchain-based Identity System Architecture}\label{fig:model}
 \end{figure}
 \subsection{Entity Description}
@@ -203,9 +202,9 @@ For the clarity of construction description, Table \ref{tab:notation} lists the 
 \subsection{System Procedures}
 
 \subsubsection{Initialization}
-The rCA initiates the system by generating a bilinear tuple $PP=\{p, \mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T, g_1, g_2, e\}$ and a hash function $H:\{0, 1\}^* \rightarrow \mathbb{Z}_p$. It selects its master secret key $\gamma\in \mathbb{Z}_p$, accumulator value $\Delta\in_R \mathbb{G}_1$, 
+The rCA initiates the system by generating a bilinear tuple $PP=\{p, \mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T, g_1, g_2, e\}$ and two hash functions $H:\{0, 1\}^* \rightarrow \mathbb{Z}_p$, $H_1:\{0, 1\}^* \rightarrow \mathbb{G}_1$. It selects its master secret key $\gamma\in \mathbb{Z}_p$, accumulator value $\Delta\in_R \mathbb{G}_1$, 
 and parameters of Bloom filter $(m, k)$ as Section \ref{section:bf}, based on the expected system scale as Section \ref{section:parameter}. It further generates an empty revocation list $\mathbb{R}_x$. The system parameters are published as 
-$$ \bigl\{ PP, \Delta, Y = g_2^\gamma, (m, k), H \bigr\}$$
+$$ \bigl\{ PP, \Delta, Y = g_2^\gamma, (m, k), H, H_1 \bigr\}$$
 
 Blockchain full nodes are gathered by generating a genesis block $B_0$, whose header's format follows Table \ref{table:format}, with all-zeros fields, except the consensus. 
 
@@ -272,6 +271,7 @@ Then, rCA submits $rx$ along with the signature $R_x$ to the blockchain nodes, u
 e(\sigma, g_2)=& e(H_1(rx), Y) \label{eq:verify}
 \end{align}
 
+
 \begin{algorithm}[t]
 	\renewcommand{\algorithmicensure}{\textbf{Output:}}
 	\caption{Accumulator}\label{alg:accumulate}
@@ -295,7 +295,7 @@ e(\sigma, g_2)=& e(H_1(rx), Y) \label{eq:verify}
 Note that, as $x_i$ in AcBF is a location format, the real input uses $H(x_i)$ to replace $x_i$. 
 \end{algorithm}
 
-2) When a lightweight node $U_i$ invokes the revocation reaction by the notification of Flag field as Section \ref{section:block_consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and executes Algorithm \ref{alg:revokeNode}.
+2) When a lightweight node $U_i$ invokes the revocation reaction by the notification of Flag as Section \ref{section:block_consensus}, it updates the maintained BF and $\Delta$ with the revocation transaction $rx$. Parse $rx$ as $(L, \mathbb{R})$ and executes Algorithm \ref{alg:revokeNode}.
 
 Worth noting that, Line \ref{line:apply_accumulator} of this algorithm focuses on the case a legal user will be innocently checked as revoked one if only with Bloom filter. Whereas, AcBF uses the accumulator $\Delta$ to fix this problem. 
 The rCA checks the follows: Firstly, $U_i$'s unique location is not in current $\mathbb{R}_x$, such that it is a valid user; Secondly, checks 
@@ -414,7 +414,7 @@ k = & \lfloor \ln \frac{n}{\theta} / \ln 2 \rceil \simeq \lfloor 1.44 \ln \frac{
 \begin{IEEEproof}
 	The accumulator algorithm was basically proved secure under $q$-SDH assumption in \cite{accumulator}, whereas, AcBF makes two modifications. Firstly, we remove the zero-knowledge proof (ZKP) to accelerate the authentication phase as \eqref{eq:authenticate}; Secondly, \textit{Add} function inserts an arbitrary member value without changing the accumulator public value $\Delta$. 
 	
-	In fact, non-ZKP authentication only helps the adversary $\mathcal{A}$ to get the member secret (or the unique location $i_{Loc}$ in AcBF) and its witness $W_i$, compared with standard algorithm. Whereas, the $i_{Loc}$ is no longer secret in AcBF, and $\mathcal{A}$ cannot learn the information of the secret key $sk_i$, which is relevant to the public key in the transaction recorded in $i_{Loc}$. Thus, as long as the consensus mechanism is safe (to ensure that every $i_{Loc}$ is unique between certificates), the additional information in \eqref{eq:authenticate} brings no advantage to adversaries. On the other hand, we analyze the advantage from cryptographic perspective. A tuple $(\Delta, x, W = \Delta^{1/(x + \gamma)})$ can be reduced to $(B=h^{x+\gamma}, x, h)$, which leaks no knowledge on $\gamma$. The final mechanism is that we use naturally unique location to replace the sequence number in certiffication. As a result, even the iCA is not totally trust, which might issue certificates illegally. It cannot issue a certificate with the same key index with another exiting one, since the location's uniqueness is inherent.
+	In fact, non-ZKP authentication only helps the adversary $\mathcal{A}$ to get the member secret (or the unique location $i_{Loc}$ in AcBF) and its witness $W_i$, compared with standard algorithm. Whereas, the $i_{Loc}$ is no longer secret in AcBF, and $\mathcal{A}$ cannot learn the information of the secret key $sk_i$, which is relevant to the public key in the transaction recorded in $i_{Loc}$. Thus, as long as the consensus mechanism is safe (to ensure that every $i_{Loc}$ is unique between certificates), the additional information in \eqref{eq:authenticate} brings no advantage to adversaries. On the other hand, we analyze the advantage from cryptographic perspective. A tuple $(\Delta, x, W = \Delta^{1/(x + \gamma)})$ can be reduced to $(B=h^{x+\gamma}, x, h)$, which leaks no knowledge on $\gamma$. The final mechanism is that we use naturally unique location to replace the sequence number in certificate. As a result, even the iCA is not totally trust, which might issue certificates illegally. It cannot issue a certificate with the same key index with another exiting one, since the location's uniqueness is inherent.
 	
 	The second modification makes our accumulator be a stand $q$-SDH tuple: Given as system with a secret key $\gamma$, and public group elements $\Delta \in \mathbb{G}_1$, $(g_2, Y = g_2^\gamma)\in \mathbb{G}_2$. The hash of member value and its witness ($H(i_{Loc}), W_i$) is identical to the tuple $(x, \Delta^{1/(x+\gamma)})$. 
 
@@ -430,6 +430,7 @@ When a certificate is successfully revoked in a block (e.g., of height $i$), the
 With the above result, any revocation transaction should be sent to the $V$ with the signature $R_x$ and auxiliary information $R_c$, where $R_c$ is the root value of all certificate registration transactions in this block. No adversary can hide or modify even one revocation item in this scenario due to the unforgeable signature and hash strength, even by forging a full node or controlling the downlink channel.
 \end{IEEEproof}
 
+
 \subsection{Accurate Revocation Policy}
 
 Note that every identity's $T_i$ is a logical and locally stored boolean parameter. In the whole procedure of AcBF, it is not transferred in any cases. Analysis of revocation soundness in Theorem \ref{theo:security} has already shown that authentication phase will detect every certificates precisely without explicit $T_i$ indication. This section discusses if the rCA can accurately deal with revocation algorithms. Here, accuracy means two sides, completeness and low-impact. The first requires that every revocation should be added in AcBF revocation data structure; the second tries to affect as least accumulator members as possible. 
@@ -437,6 +438,7 @@ Note that every identity's $T_i$ is a logical and locally stored boolean paramet
 On the one side, as long as rCA executes Algorithm \ref{alg:revokeCA} correctely, the revocation will executed completely. Since every newly revoked certificate in $\mathbb{R}$ is added in the short Bloom filter. We further check if every element in  $\mathbb{R}$ that their BF check has already been \textit{True} with the old-version BF, which indicates that the certificate may already been an accumulator member (e.g, it was once an innocent user, and applied the member). The member Add function requires an efficient check, such that the relevant certificate's further revocation will succeed. As a summary, we design a lightweight algorithm for rCA to achieve a complete revocation.
 
 On the other side, we use a temporary Bloom field $BF_{tmp}$ in Algorithm \ref{alg:revokeCA} to minimize the impact: the accumulator $Del$ function is not invoked in the case, when the certificate is checked false in current BF of other entities, but is checked revoked in the rCA. The issue is intuitive, but without the proposed revocation policy, it will be difficult or inefficient to realize it (e.g. additionally maintain a list of all accumulator members).
+
 
 
 
@@ -485,8 +487,25 @@ Worth noting that, we tried our best to enhance the compared schemes to support 
 
 \subsection{Authentication Latency}\label{sec:authentication latency}
 
+The latency measures the duration from the time a verifier gets the authentication message to the time it completes the verification. For all schemes in comparison, we use ECDSA to model $Sig(m; sk)$. The cumulative distributions in verifying all 500,000 certificates are depicted in Fig. \ref{fig:cdf}. 
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=8cm]{delay}
+	\caption{CDF of Authentication Latency}
+	\label{fig:cdf}
+\end{figure}
+
+Certledger \cite{certledger} achieves the shortest authentication latency: it manages all legitimate certificates in MHT, thus only needs $\log n$ hashes to check each certificate. All Chameleon hash (CH-based) schemes \cite{luoScalaCertScalabilityOrientedPKI2022a,jia2021process} need the largest latency, since all revoked certificates still have ``valid'' SPV information, it requires the lightweight node to rely on reliable full nodes to judge the certificate status. 
+
+The accumulator method helps \cite{yu2019blockchain} to achieve low latency. It should be mentioned that in \cite{yu2019blockchain}, the latency should be larger since it requires ZKP for member validation. By using Bloom filter, CertChain \cite{chenCertchainPublicEfficient2018a} achieves the best efficiency for the most of time, but requires unbearable rount trip time with full nodes in the false positive situation. 
+
+The proposed AcBF needs less than 1 ms in most of the cases (90\%); in other cases, the accumulator member check in \eqref{eq:authenticate} requires about 4 ms in average, even the worst case will be finished in 12 ms. Considering the average and worst cases, AcBF shows its significant advantage. Especially, the worst-case latency well suits many low-latency environment, e.g., IoV.
+
 \subsection{Storage on Lightweight Verifiers}
-We compare the storage cost on the verifier's side, where the ledger volume is not included in the measurement. Since the CH-based systems \cite{luoScalaCertScalabilityOrientedPKI2022a} do not require any data structure for revocation lists, they achieve the best performance in this term, although the CH-based mechanism cannot support lightweight node. CertLedger \cite{certledger} and Yu \textit{et al.} \cite{yu2019blockchain} only needs a MHT root hash and accumulator public value, respectively. Thus, we only compare AcBF with Bloom filter-based schemes \cite{certchain2018, jia2021process}. Fig \ref{fig:withBF} shows the storage cost versus expected revocation numbers. 
+We compare the storage cost on the verifier's side, where the ledger volume is not included in the measurement. Since the CH-based systems 
+\cite{luoScalaCertScalabilityOrientedPKI2022a} do not require any data structure for revocation lists, they achieve the best performance in this term, although the CH-based mechanism cannot support lightweight node. CertLedger \cite{certledger} and Yu \textit{et al.} 
+\cite{yu2019blockchain} only needs a MHT root hash and accumulator public value, respectively. Thus, we only compare AcBF with Bloom filter-based schemes \cite{certchain2018, jia2021process}. Fig \ref{fig:withBF} shows the storage cost versus expected revocation numbers. 
 
 In AcBF, the overhead includes the $m$-bit bloom filter and a group element for accumulator value $\Delta$; while the benchmarks only need a Bloom filter, which should be much large than that in AcBF. Strictly, the storage cannot be compared, as in Certleger, false positive situation should be in a negligible probability, such that BF is suggest to be over 400 kB in \cite{certchain2018}. We just make the Bloom filter's tolerated error probability be $0.01\%$ and $0.05\%$. For the proposed AcBF, the maximal affected user is set as $\theta/n = 0.1$ and $0.2$. 
 
@@ -523,15 +542,17 @@ Fig. \ref{fig:withBF} shows that AcBF only needs very little storage to maintain
 
 \subsection{Burden on Certificate Owner}
 
-It seems the evaluation, in which AcBF shows the most significant advantage. 
+It seems to be the evaluation where AcBF shows the most significant advantage. Since the entity does not execute any task to maintain the legality of its certificate extremely high probability. Fig. \ref{fig:owner} displays our measument.
 
- 2) impact on owners: impact user number, time cost for different cases. 
+As shown in Fig \ref{fig:owner}a, schemes in \cite{luoScalaCertScalabilityOrientedPKI2022a,certledger, jia2021process} require full nodes to update their auxiliary information, thus needs require more time than others. Especially, CH-based schemes require users in the certain blocks to undertake this burden, while in CertLedger \cite{certledger}, the MHT tree organizes all users, thus has the worst performance. Yu \textit{et al.} \cite{yu2019blockchain}'s scheme achieves very short overhead since the update mechanism for accumulator only needs globally same parameters in the revocation transaction. 
+
+AcBF has even slighter burden since the accumulator member is only 10\% of the user, which means accumulator update function occurs only with probability of 10\%. AcBF requires interaction with rCA when it applies an accumulator member, but the probability is more rare. Fig \ref{fig:owner}b corroborates our analysis. As the work in \cite{yu2019blockchain} affects all certificate owners, while in \cite{luoScalaCertScalabilityOrientedPKI2022a,jia2021process}, it only affects certificates registered in some blocks. AcBF needs only few users to update its accumulator witness, and the impact for accumulator add is negligible. 
 
 
 \section{Related Works}\label{section:related}
 Blockchain is a promising technology to devise reliable and decentralized certificate management. Fromknecht \textit{et al}. 
 \cite{fromknechtDecentralizedPublicKey} proposed CertCoin to ensure identity retention with cryptocurrencies.  
-Compared with the traditional technique like CA-based PKI \cite{pki} and PGP method \cite{pgp}, the tamper free feature brought from blockchain tackles the gap between decentralized deployment and secure certificate management, respectively. 
+Compared with the traditional technique like CA-based PKI \cite{pki} and PGP method \cite{pgp}, the tamper free feature brought from blockchain tackles the gap between decentralization and secure certificate management. 
 A totally decentralized model called SSI (self-sovereign identity) \cite{foundation_sovrin_2018} was designed by the Sovrin Foundation in 2018. In SSI, users' identities are registered in blockchain by themselves. 
 %while authorities are responsible for determination the privilege of each ID with off-chain credentials. 
 This idea has been realized in industrial implementations such as hyperledger indy \cite{indy} and uPort \cite{naik2020uport}, and attracted academic researches, like SmartDID \cite{smartdid}. However, the fully decentralized method does not suit practical systems, since it is complex to deal with the trust and revocation.
@@ -539,10 +560,11 @@ This idea has been realized in industrial implementations such as hyperledger in
 Another way that blockchain improves identity system is to let the blockchain manage distributed CAs and certificate revocation list (CRL). Wang \textit{et al.} \cite{CTRT} realized a transparent revocation by enabling OCSP (Online Certificate Status Protocol) on blockchain.
 Chen \textit{et al}. \cite{chenCertchainPublicEfficient2018a} proposed CertChain, in which a dependability-rank based consensus organized muliptle CAs and uses double counting bloom filter (DCBF) to shorten the volume of CRL. However, Luo \textit{et al.} \cite{luoScalaCertScalabilityOrientedPKI2022a} pointed out that DCBF still occupied too much storage resource on the chain. Chameleon hash \cite{ateniese2017redactable} enables redactable blockchain such that revocation can be realized without CRL, thus many schemes were proposed, such as \cite{luoScalaCertScalabilityOrientedPKI2022a,jiaRedactableBlockchainDecentralized2022, xu2021k, jia2021process}. Note that block redaction is difficult to make everyone aware, additional mechanism shold be proposed, e.g., random freshness check \cite{luoScalaCertScalabilityOrientedPKI2022a}, RSA-based accumulator \cite{jiaRedactableBlockchainDecentralized2022} and CGBF \cite{jia2021process}. Much worse problem is that redactable blockchain does not suit lightweight node, as revoked certificate can still be ``valid'' since the block header has not varied.
 
-Due to the similar distributed architecture, blockchain-based identity is promising to secure the future ad-hoc networks, such as IoT and IoV \cite{cui2022efficient, singh2018branch, smartdid, yu2019blockchain}. Especially, SmartDID \textit{et al.} \cite{smartdid} supports lightweight node deployment, by taking into account the latency restriction, unstable links, untrust peers. Whereas, we found that the above revocation mechanisms no longer works faced with a verifier only storing block headers. It is difficult for a lightweight node to cache and update CRL in time, especially when the downlink channel is not trust. Due to similar reasons, mechanisms in \cite{luoScalaCertScalabilityOrientedPKI2022a, jiaRedactableBlockchainDecentralized2022} also failed. Some schemes leveraged MHT \cite{certledger} or accumulator \cite{yu2019blockchain} to maintain all legitimate certificates, which seems to suit lightweight node since the verifier only needs to keep up with the root node or accumulator value. 
+Due to the similar distributed architecture, blockchain-based identity is promising to secure the future ad-hoc networks, such as IoT and IoV \cite{cui2022efficient, singh2018branch, smartdid, yu2019blockchain}. Especially, SmartDID \textit{et al.} \cite{smartdid} supports lightweight node deployment.%, by taking into account the latency restriction, unstable links, untrust peers. 
+Whereas, we found that the above revocation mechanisms no longer works faced with a verifier only storing block headers. It is difficult for a lightweight node to cache and update CRL in time, especially when the downlink channel is not trust. Due to similar reasons, mechanisms in \cite{luoScalaCertScalabilityOrientedPKI2022a, jiaRedactableBlockchainDecentralized2022} also failed. Some schemes leveraged MHT \cite{certledger} or accumulator \cite{yu2019blockchain} to maintain all legitimate certificates, which seems to suit lightweight node since the verifier only needs to keep up with the root node or accumulator value. 
 However, they will bring in unbearable burden on certificate owners' side (which are also thin devices), as shown in Table \ref{table:compare}. 
 
-In summary, to our best knowledge, AcBF is the first to realize revokable identity management, with extremely slight storage, computation and communication burden on both certificate owner and verifier's sides.
+In summary, to our best knowledge, AcBF is the first to realize revokable identity management, with extremely slight storage, computation and communication overhead. % on both certificate owner and verifier's sides.
 
 %Liu \textit{et al}. \cite{liuBlockchainEmpoweredCooperative2020}  proposed a decentralized and traceable collaborative authentication mechanism  by introducing the mechanism of secret sharing and dynamic proxy technology to blockchain. 
 
