@@ -130,12 +130,12 @@ They are blockchain nodes storing all blocks including transactions, and taking 
 They are resource constrained devices from the perspective of storage and bandwidth. Thus they only store block header for transaction validation. 
 It keeps up with the blockchain status by receiving newly generated blocks from at least one reachable full nodes. 
 
-The lightweight nodes will communicate with each other, thus should \textcircled{6} authenticate and convince the opponent that its identity is valid. On this aspect, each lightweight node play two roles: it is a verifier based on its lightweight ledger; and also a certificate owner, that should maintain its authentiation parameters, including secret key and auxiliary information.
+The lightweight nodes will communicate with each other, thus should \textcircled{6} authenticate and convince the opponent that its identity is valid. On this aspect, each lightweight node play two roles: it is a verifier based on its lightweight ledger; and also a certificate owner, that should maintain its authentication parameters, including secret key and auxiliary information.
 
 \subsection{Security Assumption}
 In our system, the rCA, as a core entity, is totally trusted. It securely maintains the security of secret keys and honestly generates the revocation transactions. The iCAs are not strictly honest; whereas, any entity can determine the certificate credibility according to the trust level of relevant iCA. Luckily, the blockchain is able to construct such trust well. 
 
-Any single full node is not honest, it may try responding spoofing transaction or hiding revocation if it can benefit. However, the overall blockchain system is assumed safe and live based on the consensus mechanism; it is hard to send non-consensused block header due to the assumption of selected consensus mechanism. For instance, in PoW, malicious full nodes cannot succeed in puzzle solving game.
+Any single full node is not honest, it may try responding spoofing transaction or hiding revocation if it can benefit. However, the overall blockchain system is assumed safe and live based on the consensus mechanism; it is hard to send non-consensus block header due to the assumption of selected consensus mechanism. For instance, in PoW, malicious full nodes cannot succeed in puzzle solving game, thus the lightweight node will easily detect false version when it gets a longer fork.
 
 The lightweight nodes cannot be trusted, they try to forge a valid certificate status, even if it has been revoked. In addition, malicious nodes will even forge a full node to broadcast false header to others and control the communication links. As a verifier, we assume that they will try their best to update their local ledger to the correct and latest version. 
 
@@ -144,8 +144,8 @@ This paper further assumes the communication links of lightweight node: 1) durin
 \subsection{Design Goals}
 Based on the security assumptions, AcBF should achieve the following properties as an efficient and secure scheme:  
 \begin{itemize}
-	\item \textit{Revocation-detectable authentiation.} Only user's with valid and non-revoked certificate can authenticate successfully, faced with lightweight node.
-	\item \textit{Lightweight node-aware revocation.} No reocation event should slip on a lightweight node, even in an untrusted environment. 
+	\item \textit{Revocation-detectable authentication.} Only user's with valid and non-revoked certificate can authenticate successfully, faced with lightweight node.
+	\item \textit{Lightweight node-aware revocation.} No revocation event should slip on a lightweight node, even in an untrusted environment. 
 	\item \textit{Low-latency authentication.} Latency should be strictly restricted regardless of any situation. 
 	\item \textit{Slight impact.} The above properties should be achieved without bringing much burden to honest entities, e.g, rCA and lightweight nodes.
 \end{itemize}
