@@ -47,7 +47,7 @@ Different from related work, in order to realize a trust revocation-informed blo
 
 In summary, this paper makes the following contributions:
 \begin{enumerate}
-	\item We propose a lightweight on-chain certificate management, where the authentication phase incurs negligible overhead to validate the status of the certificate. Specially, the CRL is composed by an accumulator-assisted Bloom filter (AcBF), thus the filter length can be drastically shortened without the issue of false detection. 
+	\item We propose a lightweight on-chain certificate management, where the authentication phase incurs negligible overhead to validate the status of the certificate. Specially, the certificate revocation list (CRL) is composed of an accumulator-assisted Bloom filter, thus the filter length is drastically shortened without false detection. 
 	\item To our best knowledge, we are the first to enable trust and low-latency authentication by facilitating the deployment of lightweight nodes, which makes them be aware of revocation event totally according to the block header. This crucial feature allows the lightweight node to query identity status locally, thus significantly decreases the latency.
 	\item We implement AcBF in our blockchain system, and evaluate its performance in terms of computation and storage overhead. Results show that AcBF informs every revocation to lightweight nodes, and the overhead is extremely small on both certificate owners and verifiers, thus quite suit scenarios like IoT and IoV.
 \end{enumerate}
@@ -106,7 +106,7 @@ R \overset{?}{=} h(h(h_{00}, h(cert_A)), h_1)
 \end{figure}
 
 \section{System and Security Model} \label{sec:model}
-As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication system with the following 3 kinds of entities: multiple CAs, a set of blockchain full nodes and many lightweight nodes. The follows describe each of the entities. 
+As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication system with the following 3 kinds of entities: multiple multiple certificate authorities (CAs), a set of blockchain full nodes and many lightweight nodes. The follows describe each of the entities. 
 
 
 \begin{figure}[t]
@@ -116,11 +116,11 @@ As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication s
 \end{figure}
 \subsection{Entity Description}
 \subsubsection{Certificate Authorities}
- The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. AcBF sepereates multiple CAs into two categories: one revocation CA (rCA) for certificate revocation, and muliptle issuer CAs (iCA) for issuing affairs. 
+ The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. AcBF sepereates multiple CAs into two categories: one revocation CA (rCA) for certificate revocation, and multiple issuer CAs (iCA) for issuing affairs. 
  
  The rCA should be responsible for parameter determination (as \textcircled{1} in Fig. \ref{fig:model}), and revoke on-chain certificates by \textcircled{4}submitting revocation transactions. Different from PKI, the iCAs are not fully trusted, they issue on-chain certificates to other entities by \textcircled{3}submitting registration transactions. 
 
-It should be mentioned that, it is easy to fully decentralize AcBF by realizing a threshold revocation among muliple rCAs. There are exiting cryptographic solutions such as \cite{Gennaro2019FullyDG} to be leveraged. 
+It should be mentioned that, it is easy to fully decentralize AcBF by realizing a threshold revocation among multiple rCAs. There are exiting cryptographic solutions such as \cite{Gennaro2019FullyDG} to be leveraged. 
 For the clarity of introduction, this paper just uses a one-rCA model. 
 
 \subsubsection{Full Nodes}
@@ -135,17 +135,17 @@ The lightweight nodes will communicate with each other, thus should \textcircled
 \subsection{Security Assumption}
 In our system, the rCA, as a core entity, is totally trusted. It securely maintains the security of secret keys and honestly generates the revocation transactions. The iCAs are not strictly honest; whereas, any entity can determine the certificate credibility according to the trust level of relevant iCA. Luckily, the blockchain is able to construct such trust well. 
 
-Any single full node is not honest, it may try responding spoofing transaction or hiding revocation if it can benefit. However, the overall blockchain system is assumed safe and live based on the consensus mechanism; it is hard to send non-consensus block header due to the assumption of selected consensus mechanism. For instance, in PoW, malicious full nodes cannot succeed in puzzle solving game, thus the lightweight node will easily detect false version when it gets a longer fork.
+Any single full node may not be honest: it may try responding spoofing transaction or hiding revocation if it can benefit. However, the overall blockchain system is assumed safe and live based on the consensus mechanism; it is hard to propagates a non-consensus block header due to the assumption of selected consensus mechanism. For instance, in Proof of Work (PoW), malicious full nodes cannot succeed in puzzle solving game, thus the lightweight node will easily detect false version when it gets a longer fork.
 
-The lightweight nodes cannot be trusted, they try to forge a valid certificate status, even if it has been revoked. In addition, malicious nodes will even forge a full node to broadcast false header to others and control the communication links. As a verifier, we assume that they will try their best to update their local ledger to the correct and latest version. 
+The lightweight nodes cannot be trusted as certificate owners: they try to forge a valid certificate status, even if it has been revoked. In addition, malicious nodes will even forge a full node to broadcast false header to others and control the communication links. As a verifier, we assume that they will try their best to update their local ledger to the correct and latest version. 
 
-This paper further assumes the communication links of lightweight node: 1) during long-lifetime interaction, the link is unstable and insecure; 2) in its initialization phase, it has adequate resource to update its local ledger to the latest and correct version, including other variables, e.g., Bloom filter and accumulator.
+This paper makes further assumption about the communication links of lightweight node: 1) during long-lifetime interaction, the link is unstable and insecure; 2) in its initialization phase, it has adequate resource to update its local ledger to the latest and correct version, including other variables, e.g., Bloom filter and accumulator.
 
 \subsection{Design Goals}
 Based on the security assumptions, AcBF should achieve the following properties as an efficient and secure scheme:  
 \begin{itemize}
 	\item \textit{Revocation-detectable authentication.} Only user's with valid and non-revoked certificate can authenticate successfully, faced with lightweight node.
-	\item \textit{Lightweight node-aware revocation.} No revocation event should slip on a lightweight node, even in an untrusted environment. 
+	\item \textit{Lightweight node-aware revocation.} No revocation event should be overlooked by a lightweight node, even in an untrusted environment. 
 	\item \textit{Low-latency authentication.} Latency should be strictly restricted regardless of any situation. 
 	\item \textit{Slight impact.} The above properties should be achieved without bringing much burden to honest entities, e.g, rCA and lightweight nodes.
 \end{itemize}
@@ -333,7 +333,7 @@ which indicates that it is innocent in BF. If the above hold, rCA responds the r
 \end{algorithm}
 
 \subsubsection{Authentication}\label{section:authentication}
-When $U_i$ needs to authenticate itself to a lightweight verifier $V$, it should sign a certain message or a challenge with its $sk_i$. This paper focuses on the issue that how $U_i$ convinces $V$ that the relevant $pk_i$ is associated with a valid on-chain certificate.
+When $U_i$ needs to authenticate itself to a lightweight verifier $V$, it should sign a certain message or a challenge with its $sk_i$. This paper focuses on the issue that how $U_i$ convinces $V$ that the relevant $pk_i$ is indeed associated with a valid on-chain certificate.
 
 The certificate validation message includes the certificate $cert_i$, its registered location $i_{Loc}$ (including $i_h$ and $i_p$), the auxiliary information of MHT $AUX_i$. If $T_i =1$, then the witness $W_i$ is also in the message. The entire message is as 
 $$\sigma = \biggl(Sig(m; sk), cert_i, i_{Loc}, AUX_i; W_i \text{ if } T_i =1 \biggr)$$
@@ -377,10 +377,10 @@ The length of Bloom filter in AcBF can be dramatically decreased compared with o
 Let $n, \delta$ be the possible maximal number of registered and revoked users, respectively. The remaining factor is system effect of user revocation: when revocation is executed in one consensus round, the expected affected users should be limited to $\theta$, which can be measured as the member amount of Accumulator $\Delta$. The measurement is feasible as:
 \begin{itemize}
     \item Larger member amount in $\Delta$ causes larger probability that a user to be revoked has already in $\Delta$ and more other members to update their witness.
-    \item The probability that innocent users applies for accumulator member affects the increase rate of $\theta$. Thus, $\theta$ also implies the effect when revocation is executed just in Bloom filter.
+    \item The probability that innocent users apply for accumulator member affects the increase rate of $\theta$. Thus, $\theta$ also implies the effect when revocation is executed just in Bloom filter.
 \end{itemize}
 
-Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom filter. With $\delta$ users already be revoked, the probability can be measured as follows, that an legal user is erroneously claimed as a revoked one: 
+Assume $m$ is the calculated hash length with $k$ hash functions in the Bloom filter. With $\delta$ users already being revoked, the probability can be measured as follows, that an legal user is erroneously claimed as a revoked one: 
 \begin{align} 
     \Pr(1) \simeq (1 - e^{-k\delta/m})^k 
  \end{align}
@@ -493,7 +493,7 @@ Worth noting that, we tried our best to enhance the compared schemes to support 
 
 \subsection{Authentication Latency}\label{sec:authentication latency}
 
-The latency measures the duration from the time a verifier gets the authentication message to the time it completes the verification. For all schemes in comparison, we use ECDSA to model $Sig(m; sk)$. The cumulative distributions in verifying all 500,000 certificates are depicted in Fig. \ref{fig:cdf}. 
+The latency measures the duration from the time a verifier gets the authentication message to the time it completes the verification. For all schemes in comparison, we use ECDSA to model $Sig(m; sk)$. The cumulative distributions of verification time for all 500,000 certificates are depicted in Fig. \ref{fig:cdf}. 
 
 \begin{figure}[t]
 	\centering
@@ -504,9 +504,9 @@ The latency measures the duration from the time a verifier gets the authenticati
 
 Certledger \cite{certledger} achieves the shortest authentication latency: it manages all legitimate certificates in MHT, thus only needs $\log n$ hashes to check each certificate. All Chameleon hash (CH-based) schemes \cite{luoScalaCertScalabilityOrientedPKI2022a,jia2021process} need the largest latency, since all revoked certificates still have ``valid'' SPV information, it requires the lightweight node to rely on reliable full nodes to judge the certificate status. 
 
-The accumulator method helps \cite{yu2019blockchain} to achieve low latency. It should be mentioned that in \cite{yu2019blockchain}, the latency should be larger since it requires ZKP for member validation. By using Bloom filter, CertChain \cite{chenCertchainPublicEfficient2018a} achieves the best efficiency for the most of time, but requires unbearable rount trip time with full nodes in the false positive situation. 
+The accumulator method helps \cite{yu2019blockchain} to achieve low latency. It should be mentioned that in \cite{yu2019blockchain}, the latency should be larger since it requires zero-knowledge proofs for member validation. By using Bloom filter, CertChain \cite{chenCertchainPublicEfficient2018a} achieves high efficiency for the most of time, but requires unbearable round trip time with full nodes in the false positive situation. 
 
-The proposed AcBF needs less than 1 ms in most of the cases (90\%); in other cases, the accumulator member check in \eqref{eq:authenticate} requires about 4 ms in average, even the worst case will be finished in 12 ms. Considering the average and worst cases, AcBF shows its significant advantage. Especially, the worst-case latency well suits many low-latency environment, e.g., IoV.
+The proposed AcBF needs less than 1 ms in most of the cases (90\%); in other cases, the accumulator member check in \eqref{eq:authenticate} requires about 4 ms on average, even the worst case will be finished in 12 ms. Considering the average and worst cases, AcBF shows its significant advantage. Especially, the worst-case latency well suits many low-latency environments, e.g., IoV.
 
 \subsection{Storage on Lightweight Verifiers}
 We compare the storage cost on the verifier's side, where the ledger volume is not included in the measurement. Since the CH-based systems 
@@ -515,7 +515,7 @@ We compare the storage cost on the verifier's side, where the ledger volume is n
 
 In AcBF, the overhead includes the $m$-bit bloom filter and a group element for accumulator value $\Delta$; while the benchmarks only need a Bloom filter, which should be much large than that in AcBF. Strictly, the storage cannot be compared, as in Certleger, false positive situation should be in a negligible probability, such that BF is suggest to be over 400 kB in \cite{certchain2018}. We just make the Bloom filter's tolerated error probability be $0.01\%$ and $0.05\%$. For the proposed AcBF, the maximal affected user is set as $\theta/n = 0.1$ and $0.2$. 
 
-Fig. \ref{fig:withBF} shows that AcBF only needs very little storage to maintain the short BF and accumulator value (less than 20 kB). It is a very lightweight cost compared with direct Bloom filter. It should be mentioned that Certchain uses DCBF (double Bloom filter, with every entry being an interger) for user management, which costs much larger cost. What is more, as the related work cannot bear the false positive situation, the parameter in this comparison is not adequate. Differently, AcBF designs an efficient mechanism for this issue, thus the parameter is feasible, according to our former analysis.
+Fig. \ref{fig:withBF} shows that AcBF only needs very little storage to maintain the short BF and accumulator value (less than 20 kB). It is a very lightweight cost compared with direct Bloom filter. It should be mentioned that Certchain uses DCBF (double Bloom filter, with every entry being an integer) for user management, which costs much larger cost. What is more, as the related work cannot bear the false positive situation, the parameter in this comparison is not adequate. Differently, AcBF designs an efficient mechanism for this issue, thus the parameter is feasible, according to our former analysis.
 
 
 
@@ -548,9 +548,9 @@ Fig. \ref{fig:withBF} shows that AcBF only needs very little storage to maintain
 
 \subsection{Burden on Certificate Owner}
 
-It seems to be the evaluation where AcBF shows the most significant advantage. Since the entity does not execute any task to maintain the legality of its certificate extremely high probability. Fig. \ref{fig:owner} displays our measument.
+It seems to be the evaluation where AcBF shows the most significant advantage. Since the entity does not execute any task to maintain the legality of its certificate extremely high probability. Fig. \ref{fig:owner} displays our measurement.
 
-As shown in Fig \ref{fig:owner}a, schemes in \cite{luoScalaCertScalabilityOrientedPKI2022a,certledger, jia2021process} require full nodes to update their auxiliary information, thus needs require more time than others. Especially, CH-based schemes require users in the certain blocks to undertake this burden, while in CertLedger \cite{certledger}, the MHT tree organizes all users, thus has the worst performance. Yu \textit{et al.} \cite{yu2019blockchain}'s scheme achieves very short overhead since the update mechanism for accumulator only needs globally same parameters in the revocation transaction. 
+As shown in Fig \ref{fig:owner}a, schemes in \cite{luoScalaCertScalabilityOrientedPKI2022a,certledger, jia2021process} require full nodes to update their auxiliary information, thus require more time than other schemes. Especially, CH-based schemes require users in the certain blocks to undertake this burden, while in CertLedger \cite{certledger}, the MHT tree organizes all users, thus has the worst performance. Yu \textit{et al.} \cite{yu2019blockchain}'s scheme achieves very short overhead since the update mechanism for accumulator only needs globally same parameters in the revocation transaction. 
 
 AcBF has even slighter burden since the accumulator member is only 10\% of the user, which means accumulator update function occurs only with probability of 10\%. AcBF requires interaction with rCA when it applies an accumulator member, but the probability is more rare. Fig \ref{fig:owner}b corroborates our analysis. As the work in \cite{yu2019blockchain} affects all certificate owners, while in \cite{luoScalaCertScalabilityOrientedPKI2022a,jia2021process}, it only affects certificates registered in some blocks. AcBF needs only few users to update its accumulator witness, and the impact for accumulator add is negligible. 
 
