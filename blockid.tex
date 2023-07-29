@@ -116,7 +116,7 @@ As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication s
 \end{figure}
 \subsection{Entity Description}
 \subsubsection{Certificate Authorities}
- The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. AcBF sepereates multiple CAs into two categories: one revocation CA (rCA) for certificate revocation, and multiple issuer CAs (iCA) for issuing affairs. 
+ The CAs play the similar role as those in traditional PKI systems, which are responsible for issuing and revoking certificates for other entities. AcBF separates multiple CAs into two categories: one revocation CA (rCA) for certificate revocation, and multiple issuer CAs (iCA) for issuing affairs. 
  
  The rCA should be responsible for parameter determination (as \textcircled{1} in Fig. \ref{fig:model}), and revoke on-chain certificates by \textcircled{4}submitting revocation transactions. Different from PKI, the iCAs are not fully trusted, they issue on-chain certificates to other entities by \textcircled{3}submitting registration transactions. 
 
