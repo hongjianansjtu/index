@@ -160,4 +160,110 @@ Input:
 $$ e(A, g) = e(g^{t(s)}, B)$$
 }
 
+\frame{\frametitle{Verify:}
+Input:
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+\begin{itemize}
+\item 证明信息 = $ \pi = (A, B, C) = (g^{ p(s)}, g^{ h(s)}, g^{ \alpha p(s)}) $
+\item crs =  $g^\alpha, g^{t(s)}$
+\end{itemize}
+\end{tcolorbox}
+
+\begin{enumerate}
+\item 验证多项式满足整除限制 $p(s) = t(s)\cdot h(s)$
+$$e(A, g) = e(g^{t(s)}, B)$$
+\item 验证多项式$p(X)$存在的真实性
+$$e(A, g^\alpha) = e(C, g)$$
+\end{enumerate}
+}
+
+\frame{\frametitle{多项式证明总结}
+如果一个问题可分解为某个多项式$p(X)$被具有特殊意义的多项式$t(X)$整除。则\alert{该问题可被snark高效证明}。
+
+\vskip 1cm
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+进一步说明
+\begin{itemize}
+\item 比如，要声明$p(X)$ 在点$(x_1, x_2, \dots, x_k)$取值为0。
+\item 则$t(X) = \prod (X-x_i)$.
+\end{itemize}
+另一方面
+\begin{itemize}
+\item 在结合实际电路证明问题时，验证者也掌握$p(X)$的部分信息。
+\item 如，电路的部分公开信号statement
+\item 因此，除本节所提到的证明外，还需要额外证明$A=g^{p(s)}$满足statement限制。
+\end{itemize}
+\end{tcolorbox}
+}
+\section{从QAP到多项式，如何构造$p(X)$}
+\frame{\frametitle{电路的high-level视角看必要标识}
+	\begin{tikzpicture}[grow=left,
+	level 2/.style={sibling distance=3em},
+	level 4/.style={sibling distance=1.5em}, level distance=3em]
+		\node {c7}
+		child { node [draw, circle, inner sep=0mm]{$\times$}
+		child {node {c5}
+		child {node [draw, circle, inner sep=0mm]{$+$}
+		child {node {c1}}
+		child {node {c2}}
+		}}
+		child {node {c6}
+		child {node [draw, circle, inner sep=0mm]{$\times$}
+		child {node {c3}}
+		child {node {c4}}
+		}}
+		};
+	\end{tikzpicture}
+\begin{itemize}
+	\item 整个QAP电路包含多个信号$c_i$和多个算符
+	\item 算符包含乘法和加法，其中加法可被高效方法等效省略
+	\item 信号包含输入，输出，和中间值。
+	\item 每个算符包含2个输入（left, right）和1个输出。
+\end{itemize}
+}
+
+\frame{\frametitle{第$i$个算符}
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+\centering
+	\begin{tikzpicture}[grow=left,
+	level 2/.style={sibling distance=3em},
+	level 4/.style={sibling distance=1.5em}, level distance=3em]
+		\node {$c_y$}
+		child { node [draw, circle, inner sep=0mm]{$\times$}
+		child { node {$c_v$}}
+		child { node {$c_wi$}}
+		};
+	\end{tikzpicture}
+	$v_i, w_i, y_i$分别为算符的左右输入键和输出键。
+\end{tcolorbox}
+思维逻辑：
+\begin{itemize}
+\item 信号限制：$c_v \times c_w - c_y = 0$
+\item 使$u,w,v$为三个多项式，为算符赋值unique index $r_i$:
+	\begin{itemize}
+	\item Let $v_i(r_i) = w_i(r_i) = y_i(r_i) = 1$
+	\item Let $v_i(r_j) = w_i(r_j) = y_i(r_j) = 0$ for $j\neq i$
+	\item 扩展信号限制 $c_vv_i(r_i) \times c_ww_i(r_i) - c_yy_i(r_i) = 0$
+	\end{itemize}
+\end{itemize}
+}
+
+\frame{\frametitle{令所有信号限制得到满足}
+遍历所有信号$c_1$ 到 $c_m$，有
+$$(\sum_{k=1}^m c_k v_k(r_i)) \cdot (\sum_{k=1}^m c_k w_k(r_i)) - (\sum_{k=1}^m c_k y_k(r_i)) = 0$$
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+解析：
+\begin{itemize}
+\item 对于某个算符$i$，它的相关信号的系数$$v_i(r_i) = w_i(r_i) = y_i(r_i) = 1$$
+\item 无关信号的系数为0。
+\item 因此，对任何电路内的算符，sum中仅剩下相关输入/输出的信号$c_k$
+\end{itemize}
+\alert{则，所有算符都可解析为$c_v \cdot c_w - c_y = 0$}
+\end{tcolorbox}
+}
+
+\frame{\frametitle{构造多项式}
+另上一页公式为多项式$p(X):$
+$$p(X) = (\sum_{k=1}^m c_k v_k(X)) \cdot (\sum_{k=1}^m c_k w_k(X)) - (\sum_{k=1}^m c_k y_k(X))$$
+}
 \end{document}
