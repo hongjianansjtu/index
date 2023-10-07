@@ -407,4 +407,18 @@ Note that $h$ and $h(x)$ means different.
 \item Check Linear span. $e(B, h) = e(V, h^{\beta_v})\cdot e(W, h^{\beta_w})\cdot e(Y, h^{\beta_y})$
 \end{itemize}
 }
+\frame{
+	\frametitle{Snark Analysis}
+	It is not zero knowledge: to realize \alert{Zk-SNARK} from \alert{SNARK}, additional blindness is required.
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+	\begin{itemize}
+		\item ZKP can be proved if every element is distributed identical to random chosen.
+		\item try W as instance: a modification as $W = h^{w(s)+\delta}$ instead of $h^{w(s)}$
+		\item the prover provides remainder $e(V,h^{\delta})$ to make verification pass.
+	\end{itemize}
+\end{tcolorbox}
+\vskip 0.8cm
+
+In fact, there is a more efficient scheme realizing zk-snark, even faster than the presented SNARK. Refer to [Gro16] Jen Groth. ``On the Size of Pairing-based Non-interactive Argument.'' 2016.
+}
 \end{document}
