@@ -7,6 +7,7 @@
 \usepackage{fontspec}
 \usepackage{tikz}
 \usepackage{amsmath, amssymb}
+\usepackage{hyperref}
 \setmainfont{Noto Serif CJK TC}
 \setsansfont{Noto Sans CJK TC}
 \setbeamertemplate{background}{
@@ -26,6 +27,7 @@
                \end{frame}
                 }
 \title{Research on zk-SNARK}
+\author{Jianan Hong, \href{mailto:hongjn@sjtu.edu.cn}{hongjn@sjtu.edu.cn}}
 
 \begin{document}
 \begin{frame}
@@ -68,11 +70,11 @@
 \end{tcolorbox}
 \end{frame}
 
-\frame{
+\frame[label={set}]{
 \frametitle{High-level Goal}
 \begin{enumerate}
-\item 将待证明的QAP程序表达成一个具有一定限制t的多项式P
-\item 证明P满足限制t
+\item \hyperlink{QAP}{将待证明的QAP程序表达成一个具有一定限制t的多项式P}
+\item \hyperlink{polynomial}{证明P满足限制t}
 \end{enumerate}
 
 \vskip 1cm
@@ -126,9 +128,9 @@ $$ l_i = \prod_{1\leq j\leq t}^{j\neq i} \frac{x - x_j}{x_i - x_j} $$
 \end{table}
 }
 
-\frame{\frametitle{具体算法：可信第三方根据限制t和最大多项式次数d构造参数crs}
+\frame[label={crs}]{\frametitle{具体算法：可信第三方根据限制t和最大多项式次数d构造参数crs}
 \begin{enumerate}
-\item select random $s, \alpha$
+\item \hyperlink{noname}{select random $s, \alpha$}
 \begin{itemize}
 \item $s$ is a point to evaluate polynomial; 
 \item $\alpha$ is shift to restrict polynomial.
@@ -160,7 +162,7 @@ Input:
 $$ e(A, g) = e(g^{t(s)}, B)$$
 }
 
-\frame{\frametitle{Verify:}
+\frame[label={polynomial}]{\frametitle{Verify:}
 Input:
 \begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
 \begin{itemize}
@@ -263,7 +265,146 @@ $$(\sum_{k=1}^m c_k v_k(r_i)) \cdot (\sum_{k=1}^m c_k w_k(r_i)) - (\sum_{k=1}^m 
 }
 
 \frame{\frametitle{构造多项式}
-另上一页公式为多项式$p(X):$
+令上一页公式为多项式$p(X):$
 $$p(X) = (\sum_{k=1}^m c_k v_k(X)) \cdot (\sum_{k=1}^m c_k w_k(X)) - (\sum_{k=1}^m c_k y_k(X))$$
+\vskip 0.4cm
+
+\begin{itemize}
+   \item Let $\sum c_k v_k(X) = v(X)$, so as $w(X)$ and $y(X)$
+   \item Generate $v, w, y$ with Lagrange Interpolation.
+   \item \alert{每个多项式都由算符赋值点$r_i$函数值限制}
+\end{itemize}
+
+由于$v, w, y$的最高次数都是电路乘法算符个数-1,因此$p(X)$的次数2倍于算符个数。
+}
+
+\frame{\frametitle{构造限制多项式t(X)}
+构造t(X)，该多项式在每个算符赋值点的函数值为0。
+$$t(X) = \prod (X-r_i)$$
+}
+
+\frame[label={QAP}]{\frametitle{多项式的构造特点}
+\begin{itemize}
+   \item $t(X)$ 只和电路形式相关，和具体信号无关。进一步，之和电路内乘法算符相关。
+   \begin{itemize}
+   \item $t(X)$ 因此$t(X)$可被任何人构造，无需知道对应秘密。
+   \end{itemize}
+   \item $p(X)$ 与信号值相关，只有拥有完整电路信息的实体可以构造
+   \item $h(x) = p(X)/t(X)$ 必须通过$p(X)$，也必须掌握全套信息。
+\end{itemize}
+
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+结合\hyperlink{set}{多项式的零知识证明}方法，prover已经拥有向别人证明自己拥有任何问题求解的能力
+\end{tcolorbox}
+}
+
+\section{What Remains: public statement}
+
+\frame{\frametitle{Additionally prove statement in P(X)}
+Revisit $v(X)$ as $$v(X) = \sum_{k=1}^m c_k v_k(X)$$
+
+\alert{Note: Let $v_k(X)$ be a polynomial} be like 
+\begin{align}
+v_k(x) = \begin{cases}
+1 & x=\text{the gate}\\
+0 & x=\text{other gate}
+\end{cases} 
+\end{align}
+$v_k(x)$ can be interpolated by any party. As so as $w_k, y_k$
+}
+
+\frame[label={noname}]{\frametitle{修改$v,w,y$的多项式构造方法 (use v as instance)}
+$$v = \sum_{k=1}^m c_k \cdot (v_k(X))$$
+Small difference is $v_k(X)$ is already a polynomial generated in public.
+\vskip 0.3cm
+
+\line(1,0){450}
+
+%\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+In such way, by chosing index $s$ \hyperlink{crs}{to evaluate polynomial}:
+\begin{enumerate}
+\item TPS evaluate $v_k(s)$ directly as an integer.
+\item Prover can evaluate $c_kv_k(s)$ without knowing $s$ for every signal.
+\item Verifier can evaluate $c_kv_k(s)$ for every statement.
+\end{enumerate}
+
+%\end{tcolorbox}
+}
+
+\frame{\frametitle{微调多项式证明方法}
+本页忽略关于shift的使用
+\line(1,0){450}
+
+\begin{columns}
+\column{0.4\textwidth}
+Let $g\in\mathbb{G}_1, h\in\mathbb{G}_2$
+\begin{tcolorbox}[enhanced,colframe=white,colback=white, fuzzy halo = 1.3mm with gray]
+In crs, provides:
+\begin{footnotesize}
+\begin{itemize}
+\item $\{g^{v_k(s)}, h^{w_k(s)}, g^{y_k(s)}\}$
+\item $g^{s^i}, i\leq d$
+\item $h^{t(s)}$
+\end{itemize}
+\end{footnotesize}
+\end{tcolorbox}
+\column{0.6\textwidth}
+\begin{enumerate}
+\item Prover provides 
+\begin{align}
+A = &\prod (g^{v_k(s)})^{c_k}\\
+B =& \prod (h^{w_k(s)})^{c_k}\\
+C = & \prod (g^{y_k(s)})^{c_k}\\
+H = & g^{h(s)}
+\end{align}
+\item $e(A,B)/e(C, h) =e(g^{p(S)}, h) = T$
+\item $T = e(H, h^{t_s})$
+\end{enumerate}
+\end{columns}
+}
+
+\frame{\frametitle{Add Statement in Snark}
+\begin{enumerate}
+\item In proof, the A, B, C are summed with only witnesses.
+\item The verifier supplies ultimate A, B, C with proof.
+\end{enumerate}
+}
+
+\frame{\frametitle{Overall.Gen}
+Let public statement be $c_1$ to $c_N$ and witness $I_m$ be $c_{N+1}$ to $c_m$
+\begin{itemize}
+\item Select random $s, \alpha,\beta_v, \beta_w, \beta_y$
+\item crs is 
+\end{itemize}
+
+\begin{align}
+\{g^{s^i}, g^{\alpha s^i}\}_{i=0}^d\\
+h^{\beta_v}, \{g^{\beta_v v_i(s)}\}_{i\in I_m}\\
+h^{\beta_w}, \{g^{\beta_w w_i(s)}\}_{i\in [m]}\\
+h^{\beta_y}, \{g^{\beta_y y_i(s)}\}_{i\in [m]}
+\end{align}
+}
+
+\frame{\frametitle{Overall.Prove}
+\begin{itemize}
+\item $v_m = \sum_{i\in I_m} c_i v_i(x)$
+\item $H = g^{h(s)}, \hat{H} = g^{\alpha h(s)}$
+\item $V_m = g^{v_m(s)}, \hat{V_m} = g^{\alpha v_m(s)}$
+\item $W = h^{w(s)}, \hat{W} = h^{\alpha w(s)}$
+\item $Y = g^{y(s)}, \hat{Y} = g^{\alpha y(s)}$
+\item $B = g^{\beta_vv(s)+\beta_ww(s)+\beta_yy(s)}$
+\item proof is $\pi = (H,\hat{H}, V_m, \hat{V_m}, W, \hat{W}, Y, \hat{Y}, B)$
+\end{itemize}
+
+Note that $h$ and $h(x)$ means different.
+}
+
+\frame{\frametitle{Overall.Verify}
+\begin{itemize}
+\item Shift Verify. $e(H, h^\alpha) = e(\hat{H}, h)$, so as $V_m, W, Y$
+\item Complete V as $V = V_m \cdot \prod_{i\in [N]}g^{c_i v_i(s)}$
+\item Check polynomial restriction. $e(H, h^{t(s)}) = e(V, W)/e(Y,h)$
+\item Check Linear span. $e(B, h) = e(V, h^{\beta_v})\cdot e(W, h^{\beta_w})\cdot e(Y, h^{\beta_y})$
+\end{itemize}
 }
 \end{document}
