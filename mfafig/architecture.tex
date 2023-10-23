@@ -2,8 +2,25 @@
 \usepackage{tikz}
 
 \begin{document}
-\begin{tikzpicture}[element/.style={rectangle, minimum size = 5mm, draw=blue!50!black}
+\usetikzlibrary{backgrounds, fit}
+\begin{tikzpicture}[element/.style={rectangle, minimum size = 5mm, draw=blue!50!black},
+    party/.style={rectangle, minimum size = 8mm, rounded corners = 2mm, draw=black}
 ]
-\node (AMF) [element]{AMF};
+    \node (AMF) at (0, 0) [element]{AMF};
+    \node (AUSF) at (2, 0) [element]{AUSF};
+    \node (UDM) at (3.5, 0) [element]{UDM};
+    \node (SMSF) at (0.7, 1) [element]{SMSF};
+    \node (SMS-GMSC) at (2.5, 1) [element, font=\small]{SMS-GMSC};
+    \node (gnb) at (-1, -1) [element]{gNB};
+    \node (UPF) at (0.5,-1) [element]{UPF};
+    \node (DN) at (3,-1) [element]{DN};
+    \begin{scope}[on background layer]
+        \node (5gcore) [draw = black!40, dashed, thick, rectangle, fit=(gnb)(UDM)(SMSF), rounded corners=3mm]{};
+    \end{scope}
+
+    \draw (UPF)--(AMF)--(AUSF)--(UDM)--(SMS-GMSC)--(SMSF)--(AMF)--(gnb)--(UPF)--(DN);
+    \node (UE) at (0,-3)[party]{UE};
+    \node (RP) at (3,-3)[party]{RP};
+    \node (IdP) at (-2,-3)[party]{IdP};
 \end{tikzpicture}
 \end{document}
