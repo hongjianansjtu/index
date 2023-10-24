@@ -1,26 +1,36 @@
 \documentclass[border=0pt]{standalone}
 \usepackage{tikz}
-
 \begin{document}
-\usetikzlibrary{backgrounds, fit}
-\begin{tikzpicture}[element/.style={rectangle, minimum size = 5mm, draw=blue!50!black},
-    party/.style={rectangle, minimum size = 8mm, rounded corners = 2mm, draw=black}
+\centering
+\usetikzlibrary{backgrounds, fit, shapes.arrows, arrows.meta}
+\begin{tikzpicture}[element/.style={rectangle, minimum size = 5mm, draw=blue!50!black, font=\small},
+    party/.style={rectangle, minimum size = 8mm, rounded corners = 2mm, draw=black},
+    myline/.style={>=Stealth, thick},
+    skip loop/.style = {to path={-- ++(0,#1) -| (\tikztotarget)}}
 ]
     \node (AMF) at (0, 0) [element]{AMF};
     \node (AUSF) at (2, 0) [element]{AUSF};
     \node (UDM) at (3.5, 0) [element]{UDM};
     \node (SMSF) at (0.7, 1) [element]{SMSF};
-    \node (SMS-GMSC) at (2.5, 1) [element, font=\small]{SMS-GMSC};
+    \node (SMS-GMSC) at (2.5, 1) [element, font=\footnotesize]{SMS-GMSC};
     \node (gnb) at (-1, -1) [element]{gNB};
     \node (UPF) at (0.5,-1) [element]{UPF};
     \node (DN) at (3,-1) [element]{DN};
     \begin{scope}[on background layer]
         \node (5gcore) [draw = black!40, dashed, thick, rectangle, fit=(gnb)(UDM)(SMSF), rounded corners=3mm]{};
     \end{scope}
+    \node at (2, -1.6){5G Core};
 
     \draw (UPF)--(AMF)--(AUSF)--(UDM)--(SMS-GMSC)--(SMSF)--(AMF)--(gnb)--(UPF)--(DN);
-    \node (UE) at (0,-3)[party]{UE};
-    \node (RP) at (3,-3)[party]{RP};
-    \node (IdP) at (-2,-3)[party]{IdP};
+    \node (UE) at (0,-3.5)[party]{UE};
+    \node (RP) at (3.5,-3.5)[party]{RP};
+    \node (IdP) at (-2,-3.5)[party]{IdP};
+    \draw [->, myline] (gnb) edge node[font=\footnotesize, sloped,above, text=red!70!black] {SMS MT} (UE);
+    \draw [->, myline] (UE) edge node[font=\footnotesize, sloped,above, text=red!70!black] {Authenticate} (RP);
+    \draw [->, myline] (UE) edge node[font=\footnotesize, sloped,above, text=red!70!black] {Register} (IdP);
+    \draw [->, myline, skip loop=-10mm, rounded corners] (IdP) edge (RP);
+    \node at (0.5, -4.3)[text=red!70!black,font=\footnotesize] {Trust Setup};
+    \draw [->, myline](RP) edge (3.5, -1.5);
+    \node at (2.3, -2.4) [text width =2.1cm, text=red!70!black, align=left, font =\footnotesize]{Random Code Delivery via SMS};
 \end{tikzpicture}
 \end{document}
