@@ -1,0 +1,89 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{amsmath,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+\usepackage{cite}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+
+\begin{document}
+
+\title{Anonymous Multi-Factor Authentication Scheme based on Pseudo-Random MSISDN}
+
+\author{IEEE Publication Technology,~\IEEEmembership{Staff,~IEEE,}
+        % <-this % stops a space
+\thanks{This paper was produced by the IEEE Publication Technology Group. They are in Piscataway, NJ.}% <-this % stops a space
+\thanks{Manuscript received April 19, 2021; revised August 16, 2021.}}
+
+% The paper headers
+\markboth{Journal of \LaTeX\ Class Files,~Vol.~14, No.~8, August~2021}%
+{Shell \MakeLowercase{\textit{et al.}}: A Sample Article Using IEEEtran.cls for IEEE Journals}
+
+\IEEEpubid{0000--0000/00\$00.00~\copyright~2021 IEEE}
+% Remember, if you use this you must call \IEEEpubidadjcol in the second
+% column for its text to clear the IEEEpubid mark.
+
+\maketitle
+
+\begin{abstract}
+Multi-factor authentication is a promising technology to improve the security strength of authentication. It is most convenient to achieve that goal by combining the key-based authentication and verification code transferred by short message service (SMS). As the former factor has sufficient algorithms for choice from cryptographic area based on different requirements; and the latter one is easy to deploy since each identity (even device) owns a unique mobile number (MSISDN) to receive text secretly. However, the SMS verification code method reveals user's identity to others, even the key-based method is privacy-preserving algorithm.
+
+This paper focuses on this challenge and proposes a high security-level anonymous authentication scheme. In our scheme, an authentication is executed with the factor of anonymous credential (with BBS+ signature) and the ownership of a valid MSISDN. The used zero-knowledge proof algorithm and designed protocol well tackle relevant issues, two of which are the most technical: 1) the combination is effective, such that the verifier can check whether the MSISDN is valid directly from the attribute from credential factor; 2) The factor of valid MSISDN will not release one bit more privacy other than the showing of anonymous credential. We implement our scheme in the 5G core testbed with Open5GS and USRP devices. The further experimental results and security proof show the advantageous features in terms of security and efficiency.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Anonymous authentication, multi-factor, zero-knowledge proof, pseudo-random MSISDN.
+\end{IEEEkeywords}
+
+\input{content/introduction}
+\input{content/related work}
+%\input{content/preliminary}
+\input{content/building blocks.tex}
+\input{content/system model}
+\input{content/construction}
+\input{content/analysis}
+
+\bibliographystyle{plain}
+\bibliography{content/citation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\input{template/introduction}
+%\input{template/The Design Intent, and Limitations of the Templates}
+%\input{template/Where to Get LaTeX Help --- User Groups}
+%\input{template/Other Resources}
+%\input{template/Text}
+%\input{template/Some Common Elements}
+%\input{template/Tables}
+%\input{template/Algorithms}
+%\input{template/Mathematical Typography and Why It Matters}
+%\input{template/Conclusion}
+%\input{template/Acknowledgements}
+%\input{template/end.tex}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
