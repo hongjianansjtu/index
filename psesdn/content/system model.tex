@@ -43,6 +43,8 @@ Return to the system model, the 5G core system is responsible for short message 
 		UDM & Unified Data Management, a core element to maintain each UE's in order to realize network and security services.\\
 		SMSF & Short Message Service Function, it supports SMS over NAS, delivering messages between UE and SMS-GMSC, IWMSC, or SMS-Routers.\\
 		UPF & User Plane Function, it can be seen as a gateway to exchange Internet packets from data network (DN).\\
+		MSI-SDN & Mobile Subscriber International ISDN number is a unique and immutable phone number of a UE.\\
+		\hline
 	\end{tabular}
 \end{table}
 
@@ -71,9 +73,16 @@ Hence, the following security aspects are required in this paper.
 
 \begin{itemize}
 	\item \textit{Authentication Soundness.} 
+	The authentication can be verified only when the UE owns the 
 	\item \textit{Fine-Grained Access Control.}
 	\item \textit{Privacy Preserving.} 
+	\item \textit{Semi Accountability.} For services with real-name and traceability requirements, the following property is defined, without sacrificing any privacy 
 \end{itemize}
+
+\begin{definition}[Semi Accountability]
+	For a same service $RID$ published by one RP, a UE with one MSI-SDN, since the only approach for an RP to associate two authentication is by the pseudo-random number $pm$ (as to be proved in Section \ref{sec:xxx}), the accountability is preserved when the following advantage is negligible.
+	$$xxxxx$$
+\end{definition}
 
 A scheme could be considered secure if it satisfies the following security goals:
 \subsubsection{Completeness}
