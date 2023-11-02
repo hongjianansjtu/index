@@ -75,16 +75,15 @@ Hence, the following security aspects are required in this paper.
 \begin{itemize}
 	\item \textit{Authentication Soundness.} 
 	The authentication is multiple factors, meaning that it can be verified only when the UE owns the legal credential for the accessing policy, and at the same time, the MSI-SDN of UE is trustful and reachable. Additionally, two factors cannot collude to accomplish an authentication between two owners.
-	\item \textit{Fine-Grained Access Control.} 
-	\item \textit{Privacy Preserving.} 
+	\item \textit{Fine-Grained Access Control.} The access control should be arbitrarily described as an accurate access predicate over a set of attributes.
+	\item \textit{Privacy Preserving.} Apart from the necessary information for the access control, private information 
 	\item \textit{Semi Accountability.} For services with real-name and traceability requirements, the following property is defined, without sacrificing any privacy 
 \end{itemize}
 
 \begin{definition}[Semi Accountability]
-	For a same service $RID$ published by one RP, a UE with one MSI-SDN $m_t$, since the only approach for an RP to associate two authentication is by the pseudo-random number $pm$ (as to be proved in Section \ref{sec:xxx}), the accountability is preserved if the adversary UE cannot forge two pseudo-random numbers $pm_0, pm_1$ with the following feature:
+	For a same service $RID$ published by one RP, a UE with one MSI-SDN $m_t$, since the only approach for an RP to associate two authentication is by the pseudo-random number $pm$ (as to be proved in Section \ref{sec:xxx}), the accountability is preserved if the adversary UE cannot forge two different pseudo-random numbers $pm_0\neq pm_1$, such that for $i\in (0,1)$
 	\begin{align}
-	&pm_0 \neq pm_1\\
-	\forall i \in (0,1):&\mathcal{V}(\pi_i) = 1, \pi_i = (m_t|pm_i\gets\mathcal{G}(m_t, RID))
+	\mathcal{V}(\pi_i) = 1, \pi_i = (m_t|pm_i\gets\mathcal{G}(m_t, RID))
 	\end{align}
 	where, $\pi(x|\mathcal{L}(x, <y>))$ denotes a proof for mastering a secret $x$, which proves that $x$ can formulate a predicate $\mathcal{L}$ with a set of public parameters $<y>$; $\mathcal{G}$ is a collision-resist one-way generation function; and the output of $\mathcal{V}$ denotes whether the proof can be convinced successfully.
 \end{definition}
