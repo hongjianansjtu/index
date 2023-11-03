@@ -76,7 +76,7 @@ Hence, the following security aspects are required in this paper.
 	\item \textit{Authentication Soundness.} 
 	The authentication is multiple factors, meaning that it can be verified only when the UE owns the legal credential for the accessing policy, and at the same time, the MSI-SDN of UE is trustful and reachable. Additionally, two factors cannot collude to accomplish an authentication between two owners.
 	\item \textit{Fine-Grained Access Control.} The access control should be arbitrarily described as an accurate access predicate over a set of attributes.
-	\item \textit{Privacy Preserving.} Apart from the necessary information for the access control, private information 
+	\item \textit{Privacy Preserving.} Apart from the necessary information for the access control, private information should not leaked to any entities, including other attributes, UE's permanent identity information MSI-SDN. Furthermore, unlinkability is a required feature in the authentication, when accessing two different services.
 	\item \textit{Semi Accountability.} For services with real-name and traceability requirements, the following property is defined, without sacrificing any privacy 
 \end{itemize}
 
@@ -88,11 +88,3 @@ Hence, the following security aspects are required in this paper.
 	where, $\pi(x|\mathcal{L}(x, <y>))$ denotes a proof for mastering a secret $x$, which proves that $x$ can formulate a predicate $\mathcal{L}$ with a set of public parameters $<y>$; $\mathcal{G}$ is a collision-resist one-way generation function; and the output of $\mathcal{V}$ denotes whether the proof can be convinced successfully.
 \end{definition}
 
-A scheme could be considered secure if it satisfies the following security goals:
-\subsubsection{Completeness}
-The user executes the complete procedure of the multi-factor authentication protocol with the relying party, and no additional private information is leaked in the process.
-\begin{list}{}{}
-    \item{\bf{Multi-factor authentication: }}
-    \item{\bf{Privacy-preserving: }}The privacy preservation of our scheme mainly focuses on the following problems: 1) the selective disclosure of attributes, which means that the user can choose to disclose only part of its credential attributes to the third party service provider. This allows the user to de-identify itself as much as possible in the authentication process, and enables the service provider to implement fine-grained access control. 2) The unlinkability of a user's authentication behavior with different service providers. 3) The hiding of the virtual mobile phone. And the existence of external adversaries or dishonest agents should also be taken into consideration.\\
-    \item{\bf{Intra-service linkability: }}This feature has nothing to do with the privacy protection of user information. We take it into consideration because we hope that the same user's action with the same service provider could be traceable, so that it would be possible for the service provider to handle the problem of tracing to the source of rumors and its management and control.\\
-\end{list}
