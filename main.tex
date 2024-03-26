@@ -13,7 +13,7 @@ Y. Xue is with the Society Hub, Financial Technology Thrust, Hong Kong Universit
 	\maketitle
 	
 	\begin{abstract}
-		Due to the character of selective attribute hiding authentication, the technique of anonymous credentials attracts lots of researchers from various areas, one of which is future network security. Despite its attractive features, lots of challenging issues still remains, such as dynamic privilege or attribute update, requirement of multiple authority supporting. 
+		Due to the character of selective attribute hiding authentication, the technique of anonymous credentials attracts lots of researchers from various areas, one of which is future network security. Despite its attractive features, lots of challenging issues still remain, such as dynamic privilege or attribute update, requirement of multiple authority supporting. 
 		In this paper, we propose a new fine-grained and privacy-preserving authentication scheme. In this scheme, a user's credential is issued with multiple authorities. Different from existing multi-authority system, our scheme is secure even when some authorities are not trusted by all entities. A user whose privilege is revoked can no longer authenticate withe the leverage of bilinear-based cryptographic accumulator. To realize the revocation, other users and the authorities only need lightweight computation cost with public parameters. With the tackle of these practical challenges, the proposed scheme suits various single sign-on (SSO) systems in the future network world. Rigorous security proof and experiment results show the feasibility and security of our scheme.
 	\end{abstract}
 \begin{IEEEkeywords}
@@ -22,7 +22,9 @@ Y. Xue is with the Society Hub, Financial Technology Thrust, Hong Kong Universit
 
 
 \section{Introduction}
-Thanks to the breakthrough of network technology in 5G/6G (e.g., extremely low latency, large throughput and the amount of devices) \cite{siriwardhana2021survey, jiang2021road}, various of services are provided, such as VR/AR, navigation, shared software/hardware for industrial, vehicles, and citizens. Most of the above services are commercially provided with predefined access polices, thus raise new challenges for secure and privacy-preserving authentication. The traditional user authentication methods, like 5G-AKA and PKI, no longer satisfy the upcoming network environment, as the service providers and identity authorities are becoming decentralized, the services are becoming diverse, and the privacy is becoming more and more concerned. 
+Thanks to the breakthrough of network technology in 5G/6G (e.g., extremely low latency, large throughput and the amount of devices) \cite{siriwardhana2021survey, jiang2021road}, various of services are provided, such as VR/AR, navigation, shared software/hardware for industrial, vehicles, and citizens. Most of the above services are commercially provided with predefined access polices, thus raise new challenges for secure and privacy-preserving authentication. 
+
+The traditional user authentication methods, like 5G-AKA and PKI, no longer satisfy the upcoming network environment, as the service providers and identity authorities are becoming decentralized, the services are becoming diverse, and the privacy is becoming more and more concerned. 
 
 Traditional authentication methods in wireless network require the identity provider (IdP) participates in the authentication phase, directly. For example, in 4G/5G environment \cite{3gpp.33.102, 3gpp.33.401, 3gpp.33.501}, the HSS/UDM should be online to generate the authentication vector for every attach requests; in the OAuth-based single sign-on system \cite{rfc6749, recordon2006openid}, the IdP should be always online to grant access tokens for relevant relying parties. Such restriction lets IdP master the entire access logs of every users, which is a serious privacy threat. 
 
