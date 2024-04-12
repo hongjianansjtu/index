@@ -1,10 +1,21 @@
 \documentclass[journal]{IEEEtran}
 \usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+\usepackage{balance}
 \usepackage[numbers, sort&compress]{natbib}
 \usepackage{algorithm,algorithmic}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proof}{Proof}
+\newtheorem{defi}{Definition}
+
+\hyphenation{op-tical net-works semi-conduc-tor}
+
 \title{Fine-Grained Anonymous Authentication for Multi-Authority System with Privilege Revocation}
-\author{Jianan Hong, Yingjie Xue and Cunqing Hua
-\thanks{J. Hong, C. Hua are with the School of Cipher Science and Engineering, Shanghai Jiao Tong University, Shanghai, China.
+\author{Jianan Hong, Wenjun Zhu, Kunling Li and Yingjie Xue
+\thanks{J. Hong, W. Zhu, K. Li are with the School of Cipher Science and Engineering, Shanghai Jiao Tong University, Shanghai, China.
 
 Y. Xue is with the Society Hub, Financial Technology Thrust, Hong Kong University of Science and Technology, Guangzhou, China.
 }
@@ -54,7 +65,32 @@ Also, privilege revocation is another important feature. The cryptographic accum
 
 This paper, therefore, proposes a new anonymous authentication scheme with fine-grained access control policy for the ``SSO'' architecture. In our proposed scheme, the IdPs are not \textit{single}; instead, multiple authorities 
 
-\section{Preliminaries}
+\section{Related Work}\label{sec:related}
+
+\section{System Model}\label{sec:model}
+As shown in Fig. \ref{fig:model}, the proposed scheme works in a communication system with the following 4 kinds of entities: one identity provider as a central authority (CA), several attribute authorities (AA), multiple users, and a set of service providers as relying parties (RP). Their roles and security assumptions are described in what follows. 
+
+\subsection{Architecture}
+\subsubsection{CA}
+They are responsible for user registration and revocation. Just like many multi-authority architectures like \cite{Chase2007Multi}, the CA does not manage the attribute-related credential issuing task. Instead, it only issues each user a blank credential, and leaves the remaining attribute assignment to other entitites (AA). 
+
+As an identity provider, the CA also maintains secret parameters for credential revocation, the revocation capability should remain no mater how many AAs have assigned attributes to the user's credential.
+
+
+\subsubsection{AA}
+
+\subsubsection{RP (Relying parties)}
+They publish diverse services in the network platform. Each service can be accessed according to the RP's designated access policy $\mathcal{P}$. A policy is a predicate, containing a set of attribute values (or value ranges).
+
+In a multi-IdP system, RP only accepts the UE, whose credential satisfies its policy, and signed by its trusted IdPs. Thus, RP will initialize trust relationship between IdPs.
+
+\subsubsection{UE (User equipment)}
+It is a concept in 3GPP system, which is an entity with mobile equipment (ME, generally the smart phones) and the USIM card. It can access two network: one the one hand, it can access data network (DN) via 5G data plain (as shown in Fig. \ref{fig:model}) or via other communication technology (e.g., WiFi); on the other hand, it accesses the network services directly provided by the 5G core systems, such as short message services (SMS), voice calls.
+
+As each UE is owned by a user, it will register and request credential from some IdPs, with which, it can proves its privilege to the RPs to enjoy the services in the network. 
+
+
+\section{Preliminaries}\label{sec:pre}
 \subsection{Bilinear Pairing}
 Let $\mathbb{G}_1$, $\mathbb{G}_2$ and $\mathbb{G}_T$ be 3 groups of prime order $p$. A pairing map $e:\mathbb{G}_1\times \mathbb{G}_2\rightarrow\mathbb{G}_T$ satisfies:
 \begin{itemize}
@@ -96,7 +132,7 @@ Overall speaking, Type 3 pairings are more secure and efficient to map. Thus, Ty
 		\end{tabular}
 	\end{table}
 	%$A_i$ for all $i$ has secret key $x_i$, which are the shares of $x$, so that $g_1^x = X$. A central authority manages users joining and revocation, gets $\gamma$ and $\Delta, Y = g_2^\gamma$
-\subsection{Security Issues from Untrust AA}
+\subsection{Security Issues due to Untrust AA}
 Existing multi-authority credential systems required that all authorities shall be trusted by the verifiers. This section briefly shows the reason.
 
 Most credential algorithms are based with the form of a Pederson commitment as 
@@ -108,7 +144,7 @@ Let a user's attribute $m_i = a$, it can forge $m_i$ to arbitrary values $a'$ by
 	C = g^r h_i^a h_j^x\prod_{k=1\dots n}^{k\neq i,j} h_k^{m_k} = g^r h_i^{a'} h_j^{x'}\prod_{k=1\dots n}^{k\neq i,j} h_k^{m_k}
 \end{align}
 
-Hence, if one credential is signed by any one untrusted authority, no attribute there is trustful.
+Hence, if one credential is signed by any one untrusted authority, not a single attribute there is trustful.
 	%A user with attribute set $m_1, ..., m_n$ requests an anonymous credential. He selects a set of $A_i$, each of whom is responsible for a subset of his attributes. Let $\mathbb{S}$ denote the authority set. Let $\lambda_i$ be the coefficient for $A_i$'s task of secret reconstruction in the set $\mathbb{S}$.
 \section{Construction}	
 	\subsection{System Setup}
@@ -219,6 +255,24 @@ Only authorized credential is able to convince an RP, even if the credential con
 
 We should defend the attack that, a user's credential is not authorized by a predict $P$ due to an unsatisfied attribute $m_k$ (We will extent to cases where more than one attributes are unsatisfied). Malicious Access will try to fix $m_k$ to a satisfied value (denoted as $\mathbf{m}_k$). To realize the above fix, the diff value should be set on other attribute indexes.
 
+\balance
 \bibliographystyle{IEEEtran}
 \bibliography{mybib}
+\begin{IEEEbiography}
+[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{hong}}]{Jianan Hong}
+rececived the PhD degree from the Department of Electronic Engineering and Information Science (EEIS), USTC, in 2018. From 2018 to 2021, he was an Advanced Engineer with Huawei Shanghai Research Institute. He is currently an Assistant Researcher with the School of Cyber Science and Engineering, Shanghai Jiao Tong University, Shanghai, China. His research interests include applied cryptography, secure cloud computing, privacy preserving authentication and blockchain enabled security protocols.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}{Wenjun Zhu}
+	received his B.S. degree from Shanghai Jiao Tong University in 2023. He is currently a master student in the School of Cyber Science and Engineering, Shanghai Jiao Tong University, Shanghai, China. His research interests include cross-chain technology, zkSNARK, consensus protocol for blockchains.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{lkl}}]{Kunling Li}
+	is currently an undergraduate student in the School of Cyber Science and Engineering, Shanghai Jiao Tong University, Shanghai, China.
+	Her research interests include physical-layer security, deep-learning based authentication and key negotiation.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}{Yingjie Xue}
+	received her PhD degree in Computer Science from Brown University in 2023. She is currently an assistant professer at Hong Kong University of cience and Technology (Guangzhou), Society Hub, Financial Technology Thrust. Her research interests include blockchain technology, decentralized finance and distributed computing.
+\end{IEEEbiography}
 \end{document}
