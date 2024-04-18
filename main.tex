@@ -106,7 +106,9 @@ In Type 1, $\mathbb{G}_1 = \mathbb{G}_2$; In Type 2, $\mathbb{G}_1 \neq \mathbb{
 
 Overall speaking, Type 3 pairings are more secure and efficient to map. Thus, Type 3 is used in this paper.
 
-\subsection{Zero Knowledge Proof for Discrete Logarithm}
+\subsection{Zero Knowledge Proof}
+A zero-knowledge proof (ZKP) is a cryptographic method, by which, a prover can prove to others that a given statement is true. 
+Algorithm \ref{alg:dlproof} realizes a secure ZKP for Discrete Logarithm, whose output can be publicly verified as: $y^cR = g^z$.
 
 \begin{algorithm}[h]
 	\caption{$\Sigma$ Protocol for $\{x: g^x = y\}$}\label{alg:dlproof}
@@ -117,6 +119,8 @@ Overall speaking, Type 3 pairings are more secure and efficient to map. Thus, Ty
 		\RETURN $(R, c, z)$
 	\end{algorithmic}
 \end{algorithm}
+
+According to the categories of statements to be proven (e.g., range proof, curcuit constraint), the algorithm differs. Whereas, almost all ZKPs can be realized as a three-tuple execution $(R, c, z)$\footnote{In many cases, $R$ and $z$ are both a set of elements, rather than only one variable.} like Algorithm \ref{alg:dlproof}, where $R$ is the randomized commitement, $c$ is the challenge and $z$ is to respond the challenge $c$. 
 
 	\begin{table}[h]
 		\caption{Notations}
@@ -257,6 +261,26 @@ Only authorized credential is able to convince an RP, even if the credential con
 
 We should defend the attack that, a user's credential is not authorized by a predict $P$ due to an unsatisfied attribute $m_k$ (We will extent to cases where more than one attributes are unsatisfied). Malicious Access will try to fix $m_k$ to a satisfied value (denoted as $\mathbf{m}_k$). To realize the above fix, the diff value should be set on other attribute indexes.
 
+{\appendices
+\section{Range Proof}
+This section uses a BBS-based range proof ($0\leq x \le u^l$) as an instance to describe the definition, where $x$ is the secure knowledge of $g^x$, and its relevent tuple is $(R=g^{r_x}, c, z)$\footnote{The values of $c$ and $z$ should be determined after the following proof.}.
+
+The range proof is contained in the predicate policy, with which, the RP publishes a series of BBS signature with a same secret $x\in \mathbb{Z}_p$ as 
+$$PP = \{ y = g_2^x, \forall i\in \mathbb{Z}_u:A_i = g_1^{\frac{1}{x+i}} \}.$$
+
+Let $x = \sum_{j\in\mathbb{Z}_l}\lambda_j u^j$. To realize a zero-knowledge proof of this statement, the user selectes random $v_j, r_{\lambda_j}, r_{v_j}$, and computes $\Gamma_j = e(V_j^{-r_{\lambda_j}}, g_2)e(g_1, g_2)^{r_{v_j}}$, for all $j\in\mathbb{Z}_l$, where $V_j = A_{\lambda_j}^{v_j}$. To be noted, $\sum_{j\in\mathbb{Z}_l}r_{\lambda_j} u^j$ should equal to $r_x$. 
+
+The $c$ is generated afterwards, for all $j\in\mathbb{Z}_l$, the responses are $z_{\lambda_j} = r_{\lambda_j} - c\lambda_j, z_{v_j} = r_{v_j} - cv_j$.
+
+The range-based predicate can be expressed as 
+$$\mathcal{P}(c\odot R) = \{ \forall j\in \mathbb{Z}_l: V_j, \Gamma_j, z_{\lambda_j}, z_{v_j} \}$$.
+
+Its verification method $V(\mathcal{P}(c\odot R), z_x)$ is to check 
+\begin{align}
+	\Gamma_j \overset{?}{=}& e(V_j^c, y)e(V_j^{-z_{\lambda_j}}, g_2)e(g_1,g_2)^{z_{v_j}}, \forall j\in \mathbb{Z}_u\\
+	z_x \overset{?}{=}& \sum_{j\in\mathbb{Z}_l}z_{\lambda_j} u^j \nonumber
+\end{align}
+}
 \balance
 \bibliographystyle{IEEEtran}
 \bibliography{mybib}
