@@ -117,23 +117,53 @@ $$ l_i = \prod_{1\leq j\leq t}^{j\neq i} \frac{x - x_j}{x_i - x_j} $$
 	\item 在$n$维空间中有互不平行的超平面
 	\item $n$个超平面相交于一个点
 \end{enumerate}
-}
-\section{对多项式的证明}
 
-\frame{\frametitle{Idea to prove polynomial factoring}
-\begin{table}
-\caption{Targets}
-\begin{tabular}{l| c| c}
-\hline
-& prover & verifier \\
-\hline
-初始信息 & $P, h, t$ & $t$ \\
-待证明 && 选择任意 $\hat{x}$ \\
-& 计算 $h(\hat{x}), P(\hat{x})$ & \\
-& & $h(\hat{x}) t(\hat{x})= P(\hat{x})$\footnote{想比较因式分解的证明，这里只证明三个数值的乘积关系}\\
-\hline
-\end{tabular}
-\end{table}
+\vskip 1cm
+
+To express a hyperplane in an \alert{n-dimension} span:
+\begin{itemize}
+	\item a n-dimension vector: $$(e_1, e_2, \dots, e_n)\cdot \vec{x} = c$$
+	\item 互不平行的超平面：线性无关向量
+\end{itemize}
+}
+
+\frame{
+	\frametitle{Hyperplane: Continue}
+	考虑$n$个线性无关向量穿过一个点$\Omega \in \mathbb{R}^n$
+$$(s_1, s_2, \dots, s_n) \gets 
+\begin{pmatrix}
+	e_{1,1} &  \cdots & e_{1,n} \\
+	\vdots & \ddots & \vdots \\
+	e_{n,1} & \cdots & e_{n,n}
+\end{pmatrix}
+\cdot \Omega
+$$
+\begin{itemize}
+	\item $s_i$ 就是隐藏$\Omega$的秘密信息
+	\item 如果想从$s_i$恢复$\Omega$，只需要找到逆矩阵
+\end{itemize}
+}
+\frame{
+	\frametitle{LSSS的效果}
+	\begin{itemize}
+		\item \alert{高效性} 只要凑够足够的share，得到秘密的算法是高效的；
+		\item \alert{秘密性} 只要没有凑够，那么对秘密的知识量为0
+			\begin{itemize}
+				\item 对于多项式。确定其他$t-1$个点，修改第$t$个点，秘密值取遍空间；
+				\item 对于超平面，确定其他平面，另一个平面的值能让秘密值取遍全空间。
+			\end{itemize}
+		\item 一般来说，秘密值是多项式的$P(0)$或空间中点的第一维数值。
+	\end{itemize}
+}
+\section{Paillier Cryptosystem}
+
+\frame{\frametitle{Algorithm}
+Big primes $p, q$ are securely chosen:
+\begin{enumerate}
+	\item $n=pq, \lambda = lcm(p-1, q-1)$, select $g\in \mathbb{Z}_{n^2}^*$. 可以为2
+	\item $\mu = (L(g^\lambda \mod n^2))^{-1} \mod n$. \alert{L(x) = (x-1)/n}
+	\item pk = $n,g$. sk = $\lambda, \mu$
+\end{enumerate}
 }
 
 \frame[label={crs}]{\frametitle{具体算法：可信第三方根据限制t和最大多项式次数d构造参数crs}
