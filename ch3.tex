@@ -164,6 +164,13 @@ Big primes $p, q$ are securely chosen:
 	\item $\mu = (L(g^\lambda \mod n^2))^{-1} \mod n$. \alert{L(x) = (x-1)/n}
 	\item pk = $n,g$. sk = $\lambda, \mu$
 \end{enumerate}
+
+先不考虑私钥格式与解密，先看加密方法：
+\begin{enumerate}
+	\item 明文$0\leq m\leq n$;
+	\item 选择 $r$ 与 $n$ 互质；
+	\item 密文 $c = g^m \cdot r^n \mod n^2$
+\end{enumerate}
 }
 
 \frame[label={crs}]{\frametitle{具体算法：可信第三方根据限制t和最大多项式次数d构造参数crs}
